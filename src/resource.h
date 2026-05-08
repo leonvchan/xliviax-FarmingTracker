@@ -1,0 +1,11 @@
+#ifndef RESOURCE_H
+#define RESOURCE_H
+
+#define IDB_ICON_FARMINGTRACKER 101
+
+#define IDR_WAV_STANDARD    201
+#define IDR_WAV_PRECURSOR   202
+#define IDR_WAV_INFUSION    203
+#define IDR_WAV_ALERT       204
+
+#endif

@@ -1,0 +1,9 @@
+#include "resource.h"
+#include <windows.h>
+
+IDB_ICON_FARMINGTRACKER RCDATA "..\\data\\icons\\farmingtracker.png"
+
+IDR_WAV_STANDARD    RCDATA "..\\data\\sounds\\default.wav"
+IDR_WAV_PRECURSOR   RCDATA "..\\data\\sounds\\precursor.wav"
+IDR_WAV_INFUSION    RCDATA "..\\data\\sounds\\infusion.wav"
+IDR_WAV_ALERT       RCDATA "..\\data\\sounds\\alert.wav"
