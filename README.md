@@ -137,5 +137,4 @@ This project is licensed under the MIT License — see the [LICENSE] file for de
 
 For issues, feature requests, or questions, please visit the [GitHub repository](https://github.com/xLiviax-Dev/FarmingTracker).
 
-
 <img width="1689" height="1435" alt="Screenshot 2026-05-06 212214" src="https://github.com/user-attachments/assets/c7bf9d33-82fb-43c8-905d-902d3c38f348" />
