@@ -19,6 +19,7 @@ struct DropEntry
     long long totalValue;
     int magicFind = -1;
     std::string timestamp; // ISO-8601 format: "YYYY-MM-DD HH:MM:SS"
+    std::string characterName; // Character name at the time of the drop
 };
 
 struct SessionData

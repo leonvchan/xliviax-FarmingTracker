@@ -7,18 +7,20 @@
 #include "gw2_api.h"
 #include "ui_notifications.h"
 #include "localization.h"
+#include "ui_common.h"
 #include "../include/nlohmann/json.hpp"
 
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+#include <deque>
 #include <mutex>
 #include <chrono>
-#include <ctime>
-#include <cstdlib>
-#include <set>
-#include <algorithm>
-#include <sstream>
-#include <deque>
 #include <fstream>
-#include <atomic>
+#include <sstream>
+#include <algorithm>
+#include <functional>
 
 using json = nlohmann::json;
 
@@ -107,20 +109,23 @@ static void CheckAndTriggerNotification(int apiId, Stat& st)
     // 2. Check for Infusion
     if (!shouldNotify && g_Settings.notificationInfusionAlert)
     {
-        std::string lowerName = st.details.name;
-        std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
-        
-        std::string lowerDesc = st.details.description;
-        std::transform(lowerDesc.begin(), lowerDesc.end(), lowerDesc.begin(), ::tolower);
-
-        bool isInfusion = (lowerName.find("infusion") != std::string::npos || 
-                          lowerDesc.find("infusion") != std::string::npos);
+        // Check if this is an actual infusion by upgrade component type
+        bool isInfusion = false;
+        if (st.details.loaded && st.details.itemType == ItemType::UpgradeComponent)
+        {
+            std::string lowerUpgradeType = st.details.upgradeComponentType;
+            std::transform(lowerUpgradeType.begin(), lowerUpgradeType.end(), lowerUpgradeType.begin(), ::tolower);
+            isInfusion = (lowerUpgradeType == "infusion");
+        }
         
         // Filter out Agony Infusions if not enabled
         if (isInfusion && !g_Settings.notificationIncludeAgonyInfusions)
         {
-            if (lowerName.find("agony infusion") != std::string::npos || 
-                lowerName.find("qual-infusion") != std::string::npos) // German check
+            std::string lowerName = st.details.name;
+            std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+            
+            if (lowerName.find("agony") != std::string::npos || 
+                lowerName.find("qual") != std::string::npos) // German check
             {
                 isInfusion = false;
             }
@@ -159,6 +164,15 @@ static void CheckAndTriggerNotification(int apiId, Stat& st)
         {
             // Standard logic: Any one of them met is enough
             shouldNotify = (valueMet || rarityMet);
+        }
+
+        // 4. Final safety check: Filter out non-profit items if disabled (unless it's a special alert)
+        if (shouldNotify && specialText.empty())
+        {
+            if (value <= 0 && !g_Settings.notificationIncludeNonProfit)
+            {
+                shouldNotify = false;
+            }
         }
     }
 
@@ -207,8 +221,7 @@ void ItemTracker::AddDrop(const std::map<int, long long>& items,
     char timestamp[32];
     strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", &tm);
 
-    // Always record drops with timestamps (will only be saved if flag is enabled)
-    // This prevents data loss if flag is changed mid-session
+    // Always record drops with timestamps for the Timeline
     std::lock_guard<std::mutex> dropsLock(s_SessionDropsMutex);
 
     for (auto& [id, delta] : items)
@@ -222,6 +235,7 @@ void ItemTracker::AddDrop(const std::map<int, long long>& items,
         drop.totalValue = 0; // Will be calculated when saving
         drop.magicFind = s_MagicFind.load();
         drop.timestamp = timestamp;
+        drop.characterName = UICommon::s_AccountNameBuf;
         s_SessionDrops.push_back(drop);
     }
 
@@ -236,6 +250,7 @@ void ItemTracker::AddDrop(const std::map<int, long long>& items,
         drop.totalValue = 0; // Will be calculated when saving
         drop.magicFind = s_MagicFind.load();
         drop.timestamp = timestamp;
+        drop.characterName = UICommon::s_AccountNameBuf;
         s_SessionDrops.push_back(drop);
     }
 
@@ -491,7 +506,7 @@ long long Stat::GetMaxProfit() const
         return 0;
     
     long long tpProfit = ItemTracker::TpSellProceedsPerUnitCopper(details);
-    long long vendorProfit = details.noSell ? 0 : details.vendorValue;
+    long long vendorProfit = ItemTracker::CanSellToVendor(details) ? (long long)details.vendorValue : 0;
     return std::max(tpProfit, vendorProfit);
 }
 
@@ -533,6 +548,32 @@ bool ItemTracker::IsFavorite(int apiId)
     return false;
 }
 
+std::set<int> ItemTracker::GetFavoriteItemIds()
+{
+    std::lock_guard<std::mutex> lock(s_Mutex);
+    std::set<int> favoriteIds;
+    
+    for (const auto& [id, stat] : s_Items)
+    {
+        if (stat.isFavorite)
+            favoriteIds.insert(id);
+    }
+    return favoriteIds;
+}
+
+std::set<int> ItemTracker::GetFavoriteCurrencyIds()
+{
+    std::lock_guard<std::mutex> lock(s_Mutex);
+    std::set<int> favoriteIds;
+    
+    for (const auto& [id, stat] : s_Currencies)
+    {
+        if (stat.isFavorite)
+            favoriteIds.insert(id);
+    }
+    return favoriteIds;
+}
+
 std::map<int, Stat> ItemTracker::GetFavoriteItems()
 {
     std::lock_guard<std::mutex> lock(s_Mutex);
@@ -559,11 +600,10 @@ std::map<int, Stat> ItemTracker::GetFavoriteCurrencies()
 
 std::vector<SessionHistory::DropEntry> ItemTracker::GetSessionDropsCopy()
 {
+    // Lock mutexes in the same order as AddDrop to avoid deadlock: s_Mutex first, then s_SessionDropsMutex
+    std::lock_guard<std::mutex> statsLock(s_Mutex);
     std::lock_guard<std::mutex> lock(s_SessionDropsMutex);
     std::vector<SessionHistory::DropEntry> drops = s_SessionDrops;
-
-    // Fill in details from current stats if possible
-    std::lock_guard<std::mutex> statsLock(s_Mutex);
     for (auto& drop : drops)
     {
         if (drop.isCurrency)
@@ -1019,28 +1059,19 @@ long long ItemTracker::GetStatProfit(const Stat& stat)
     if (stat.HasCustomProfit())
         return CustomProfitManager::GetCustomProfit(stat.apiId) * stat.count;
 
-    // Use MAX profit from Vendor or TP Sell (TP Buy is buy price, not profit)
+    // Coins are counted directly
     if (stat.IsCoin())
-        return stat.count; // Coins are counted directly
+        return stat.count;
 
     // Salvage kits are not calculated as cost, just show negative count
     if (s_SalvageKits.find(stat.apiId) != s_SalvageKits.end())
-        return 0; // Salvage kits only show usage count, no profit calculation
+        return 0;
 
-    // Calculate all possible sell values per unit
-    long long vendorPrice = stat.details.vendorValue;
-    long long tpSellPrice = static_cast<long long>(stat.details.tpSellPrice * 85.0 / 100.0); // 15% fee on sell
+    // Calculate all possible sell values per unit using helper functions
+    long long vendorPrice = CanSellToVendor(stat.details) ? (long long)stat.details.vendorValue : 0;
+    long long tpSellPrice = CanSellOnTp(stat.details) ? TpSellProceedsPerUnitCopper(stat.details) : 0;
 
-    // Check vendor price (if not noSell)
-    long long maxPrice = 0;
-    if (!stat.details.noSell && vendorPrice > 0) {
-        maxPrice = vendorPrice;
-    }
-
-    // Check TP price (API is source of truth - if it returns a price, the item is tradable)
-    if (tpSellPrice > maxPrice) {
-        maxPrice = tpSellPrice;
-    }
+    long long maxPrice = std::max(vendorPrice, tpSellPrice);
 
     // If no price is available, item is not tradeable
     if (maxPrice == 0)
@@ -1311,14 +1342,14 @@ std::vector<std::pair<std::chrono::system_clock::time_point, long long>> ItemTra
 
 long long ItemTracker::TpSellProceedsPerUnitCopper(const ApiDetails& d)
 {
-    if (d.tpSellPrice <= 0) return 0;
+    if (d.accountBound || d.tpSellPrice <= 0) return 0;
     // Apply 15% TP fee (85/100)
     return static_cast<long long>(d.tpSellPrice * 85.0 / 100.0);
 }
 
 long long ItemTracker::TpBuyProceedsPerUnitCopper(const ApiDetails& d)
 {
-    if (d.tpBuyPrice <= 0) return 0;
+    if (d.accountBound || d.tpBuyPrice <= 0) return 0;
     // TP Instant Sell also has 15% fee (5% listing + 10% exchange)
     return static_cast<long long>(d.tpBuyPrice * 85.0 / 100.0);
 }
@@ -1334,7 +1365,26 @@ bool ItemTracker::CanSellOnTp(const ApiDetails& d)
 
 bool ItemTracker::CanSellToVendor(const ApiDetails& d)
 {
-    return d.vendorValue > 0 && !d.noSell;
+    if (d.noSell || d.vendorValue <= 0)
+        return false;
+
+    // Account-bound items logic
+    if (d.accountBound)
+    {
+        // Only equipment (Armor, Weapons, Trinkets, Back items) that is account-bound 
+        // is typically sellable to vendors for gold.
+        if (d.itemType == ItemType::Armor || d.itemType == ItemType::Weapon || 
+            d.itemType == ItemType::Trinket || d.itemType == ItemType::Backpack)
+        {
+            return true;
+        }
+        
+        // Most other account-bound items like Materials (Blood Rubies), 
+        // Consumables, Trophies, etc. are NOT sellable for gold even if they have a value in the API.
+        return false;
+    }
+
+    return true;
 }
 
 long long ItemTracker::CalcTotalTpSellProfit()
@@ -1343,7 +1393,7 @@ long long ItemTracker::CalcTotalTpSellProfit()
     long long total = 0;
     for (auto& [id, stat] : s_Items)
     {
-        if (!stat.details.loaded) continue;
+        if (!stat.details.loaded || IsItemIgnored(id)) continue;
         long long per = TpSellProceedsPerUnitCopper(stat.details);
         if (per > 0) total += stat.count * per;
     }
@@ -1356,7 +1406,7 @@ long long ItemTracker::CalcTotalTpInstantProfit()
     long long total = 0;
     for (auto& [id, stat] : s_Items)
     {
-        if (!stat.details.loaded) continue;
+        if (!stat.details.loaded || IsItemIgnored(id)) continue;
         long long per = TpBuyProceedsPerUnitCopper(stat.details);
         if (per > 0) total += stat.count * per;
     }
@@ -1369,7 +1419,7 @@ long long ItemTracker::CalcTotalVendorProfit()
     long long total = 0;
     for (auto& [id, stat] : s_Items)
     {
-        if (!stat.details.loaded) continue;
+        if (!stat.details.loaded || IsItemIgnored(id)) continue;
         if (CanSellToVendor(stat.details))
             total += stat.count * stat.details.vendorValue;
     }
@@ -1449,10 +1499,28 @@ void ItemTracker::SaveData(const char* addonDir)
             dropJson["totalValue"] = drop.totalValue;
             dropJson["magicFind"] = drop.magicFind;
             dropJson["timestamp"] = drop.timestamp;
+            dropJson["characterName"] = drop.characterName;
             dropsArray.push_back(dropJson);
         }
     }
     data["sessionDrops"] = dropsArray;
+
+    // Save ignored items
+    nlohmann::json ignoredItemsArray = nlohmann::json::array();
+    {
+        auto ignoredIds = IgnoredItemsManager::GetIgnoredItems();
+        for (int id : ignoredIds)
+            ignoredItemsArray.push_back(id);
+    }
+    data["ignoredItems"] = ignoredItemsArray;
+
+    nlohmann::json ignoredCurrenciesArray = nlohmann::json::array();
+    {
+        auto ignoredIds = IgnoredItemsManager::GetIgnoredCurrencies();
+        for (int id : ignoredIds)
+            ignoredCurrenciesArray.push_back(id);
+    }
+    data["ignoredCurrencies"] = ignoredCurrenciesArray;
 
     // Write to file
     std::ofstream file(dataPath);
@@ -1553,8 +1621,21 @@ void ItemTracker::LoadData(const char* addonDir)
                 drop.totalValue = dropJson.value("totalValue", 0LL);
                 drop.magicFind = dropJson.value("magicFind", -1);
                 drop.timestamp = dropJson.value("timestamp", "");
+                drop.characterName = dropJson.value("characterName", "");
                 s_SessionDrops.push_back(drop);
             }
+        }
+
+        // Load ignored items
+        if (data.contains("ignoredItems") && data["ignoredItems"].is_array())
+        {
+            for (const auto& idJson : data["ignoredItems"])
+                IgnoredItemsManager::IgnoreItem(idJson.get<int>());
+        }
+        if (data.contains("ignoredCurrencies") && data["ignoredCurrencies"].is_array())
+        {
+            for (const auto& idJson : data["ignoredCurrencies"])
+                IgnoredItemsManager::IgnoreCurrency(idJson.get<int>());
         }
     }
     catch (...)
@@ -1695,6 +1776,12 @@ void ItemTracker::ApplyItemsFromApi(const json& itemsArray, const json& pricesAr
             else if (t == "Tool") st->details.itemType = ItemType::Tool;
             else if (t == "Trophy") st->details.itemType = ItemType::Trophy;
             else if (t == "Unlock") st->details.itemType = ItemType::Unlock;
+
+            // Extract upgrade component type if applicable
+            if (t == "UpgradeComponent" && item.contains("details") && item["details"].contains("type") && item["details"]["type"].is_string())
+            {
+                st->details.upgradeComponentType = item["details"]["type"].get<std::string>();
+            }
         }
 
         // Trigger notification now that details are loaded

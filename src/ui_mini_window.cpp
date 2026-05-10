@@ -19,6 +19,12 @@ void RenderMiniWindow()
     if (g_Settings.miniWindowClickThrough)
         flags |= ImGuiWindowFlags_NoInputs;
 
+    if (g_Settings.miniWindowHideTitleBar)
+        flags |= ImGuiWindowFlags_NoTitleBar;
+
+    if (g_Settings.miniWindowLocked)
+        flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+
     if (ImGui::Begin("Farming Tracker Mini##FT_Mini", &g_Settings.showMiniWindow, flags))
     {
         PushAccentColor();

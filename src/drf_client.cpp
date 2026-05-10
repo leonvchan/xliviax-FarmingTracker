@@ -23,6 +23,7 @@
 #include "../include/nlohmann/json.hpp"
 #include "shared.h"   // APIDefs for logging
 #include "gw2_fetcher.h"
+#include "ui_common.h"
 
 #include <string>
 #include <thread>
@@ -129,6 +130,13 @@ static void HandleDataMessage(const std::string& jsonText)
         auto j = json::parse(jsonText);
         auto& payload = j.at("payload");
         auto& drop    = payload.at("drop");
+
+        // Extract character name from DRF data
+        if (payload.contains("character") && payload["character"].is_string())
+        {
+            std::string characterName = payload["character"].get<std::string>();
+            strncpy_s(UICommon::s_AccountNameBuf, characterName.c_str(), sizeof(UICommon::s_AccountNameBuf));
+        }
 
         if (drop.contains("magic_find") || drop.contains("magicFind") || drop.contains("mf"))
         {

@@ -16,6 +16,8 @@ namespace Gw2Api
 
     bool FetchCurrenciesAll(const std::string& token, nlohmann::json& currenciesOut, std::string& error);
 
+    bool FetchAccountName(const std::string& token, std::string& accountName, std::string& error);
+
     // Debug logging
     struct Gw2ApiLogEntry
     {

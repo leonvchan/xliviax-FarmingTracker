@@ -232,6 +232,7 @@ void SettingsManager::Load()
         if (j.contains("miniWindowShowTotalItems")) g_Settings.miniWindowShowTotalItems = j["miniWindowShowTotalItems"].get<bool>();
         if (j.contains("miniWindowShowSessionDuration")) g_Settings.miniWindowShowSessionDuration = j["miniWindowShowSessionDuration"].get<bool>();
         if (j.contains("miniWindowClickThrough")) g_Settings.miniWindowClickThrough = j["miniWindowClickThrough"].get<bool>();
+        if (j.contains("miniWindowHideTitleBar")) g_Settings.miniWindowHideTitleBar = j["miniWindowHideTitleBar"].get<bool>();
         if (j.contains("mainWindowClickThrough")) g_Settings.mainWindowClickThrough = j["mainWindowClickThrough"].get<bool>();
         if (j.contains("miniWindowPosX")) g_Settings.miniWindowPosX = j["miniWindowPosX"].get<float>();
         if (j.contains("miniWindowPosY")) g_Settings.miniWindowPosY = j["miniWindowPosY"].get<float>();
@@ -244,6 +245,9 @@ void SettingsManager::Load()
         if (j.contains("activeTab")) g_Settings.activeTab = j["activeTab"].get<int>();
         if (j.contains("enableGradientBackgrounds")) g_Settings.enableGradientBackgrounds = j["enableGradientBackgrounds"].get<bool>();
         if (j.contains("showProfitSparkline")) g_Settings.showProfitSparkline = j["showProfitSparkline"].get<bool>();
+        if (j.contains("enableSummariesInProfitTab")) g_Settings.enableSummariesInProfitTab = j["enableSummariesInProfitTab"].get<bool>();
+        if (j.contains("enableBestDropHighlight")) g_Settings.enableBestDropHighlight = j["enableBestDropHighlight"].get<bool>();
+        if (j.contains("enableBestDropInMiniWindow")) g_Settings.enableBestDropInMiniWindow = j["enableBestDropInMiniWindow"].get<bool>();
         if (j.contains("gradientTopColor"))
         {
             auto arr = j["gradientTopColor"];
@@ -265,6 +269,7 @@ void SettingsManager::Load()
         if (j.contains("iconSize"))           g_Settings.iconSize           = j["iconSize"].get<int>();
         if (j.contains("gridIconSize"))       g_Settings.gridIconSize       = j["gridIconSize"].get<int>();
         if (j.contains("showRarityBorder"))   g_Settings.showRarityBorder   = j["showRarityBorder"].get<bool>();
+        if (j.contains("rarityBorderSize"))   g_Settings.rarityBorderSize   = j["rarityBorderSize"].get<float>();
         if (j.contains("itemSortMode"))       g_Settings.itemSortMode       = j["itemSortMode"].get<int>();
         if (j.contains("itemRarityFilterMin")) g_Settings.itemRarityFilterMin = j["itemRarityFilterMin"].get<int>();
         if (j.contains("showItemIcons"))      g_Settings.showItemIcons      = j["showItemIcons"].get<bool>();
@@ -274,6 +279,7 @@ void SettingsManager::Load()
         if (j.contains("showTypeAsTabs")) g_Settings.showTypeAsTabs = j["showTypeAsTabs"].get<bool>();
         if (j.contains("currencyGroupByCategory")) g_Settings.currencyGroupByCategory = j["currencyGroupByCategory"].get<bool>();
         if (j.contains("currencyShowAsTabs")) g_Settings.currencyShowAsTabs = j["currencyShowAsTabs"].get<bool>();
+        if (j.contains("lockTabOrder")) g_Settings.lockTabOrder = j["lockTabOrder"].get<bool>();
         if (j.contains("mainWindowOpacity")) g_Settings.mainWindowOpacity = j["mainWindowOpacity"].get<float>();
         if (j.contains("miniWindowOpacity")) g_Settings.miniWindowOpacity = j["miniWindowOpacity"].get<float>();
         if (j.contains("accentColorR")) g_Settings.accentColorR = j["accentColorR"].get<float>();
@@ -281,9 +287,6 @@ void SettingsManager::Load()
         if (j.contains("accentColorB")) g_Settings.accentColorB = j["accentColorB"].get<float>();
         if (j.contains("enableSessionHistory")) g_Settings.enableSessionHistory = j["enableSessionHistory"].get<bool>();
         if (j.contains("maxSessionHistory")) g_Settings.maxSessionHistory = j["maxSessionHistory"].get<int>();
-        // Migration: old key "saveAllItemsInHistory" → new key "enableSessionTimeline"
-        if (j.contains("enableSessionTimeline")) g_Settings.enableSessionTimeline = j["enableSessionTimeline"].get<bool>();
-        else if (j.contains("saveAllItemsInHistory")) g_Settings.enableSessionTimeline = j["saveAllItemsInHistory"].get<bool>();
         if (j.contains("overwriteSessionHistory")) g_Settings.overwriteSessionHistory = j["overwriteSessionHistory"].get<bool>();
         if (j.contains("lastResetTimestamp")) g_Settings.lastResetTimestamp = j["lastResetTimestamp"].get<std::string>();
 
@@ -410,6 +413,7 @@ void SettingsManager::Load()
         
         // Ignored Items
         if (j.contains("enableIgnoredItems")) g_Settings.enableIgnoredItems = j["enableIgnoredItems"].get<bool>();
+        if (j.contains("enableIgnoredTab")) g_Settings.enableIgnoredTab = j["enableIgnoredTab"].get<bool>();
 
         // Performance Settings
         if (j.contains("enableIconCache")) g_Settings.enableIconCache = j["enableIconCache"].get<bool>();
@@ -606,6 +610,7 @@ void SettingsManager::Save()
     j["miniWindowShowTotalItems"] = g_Settings.miniWindowShowTotalItems;
     j["miniWindowShowSessionDuration"] = g_Settings.miniWindowShowSessionDuration;
     j["miniWindowClickThrough"] = g_Settings.miniWindowClickThrough;
+    j["miniWindowHideTitleBar"] = g_Settings.miniWindowHideTitleBar;
     j["mainWindowClickThrough"] = g_Settings.mainWindowClickThrough;
     j["miniWindowPosX"]         = g_Settings.miniWindowPosX;
     j["miniWindowPosY"]         = g_Settings.miniWindowPosY;
@@ -618,6 +623,9 @@ void SettingsManager::Save()
     j["activeTab"]              = g_Settings.activeTab;
     j["enableGradientBackgrounds"] = g_Settings.enableGradientBackgrounds;
     j["showProfitSparkline"] = g_Settings.showProfitSparkline;
+    j["enableSummariesInProfitTab"] = g_Settings.enableSummariesInProfitTab;
+    j["enableBestDropHighlight"] = g_Settings.enableBestDropHighlight;
+    j["enableBestDropInMiniWindow"] = g_Settings.enableBestDropInMiniWindow;
     j["gradientTopColor"] = nlohmann::json::array();
     for (int i = 0; i < 4; i++)
         j["gradientTopColor"].push_back(g_Settings.gradientTopColor[i]);
@@ -627,6 +635,7 @@ void SettingsManager::Save()
     j["iconSize"]              = g_Settings.iconSize;
     j["gridIconSize"]          = g_Settings.gridIconSize;
     j["showRarityBorder"]      = g_Settings.showRarityBorder;
+    j["rarityBorderSize"]      = g_Settings.rarityBorderSize;
     j["itemSortMode"]          = g_Settings.itemSortMode;
     j["itemRarityFilterMin"]   = g_Settings.itemRarityFilterMin;
     j["showItemIcons"]         = g_Settings.showItemIcons;
@@ -636,13 +645,13 @@ void SettingsManager::Save()
     j["showTypeAsTabs"] = g_Settings.showTypeAsTabs;
     j["currencyGroupByCategory"] = g_Settings.currencyGroupByCategory;
     j["currencyShowAsTabs"] = g_Settings.currencyShowAsTabs;
+    j["lockTabOrder"]           = g_Settings.lockTabOrder;
     j["mainWindowOpacity"]     = g_Settings.mainWindowOpacity;
     j["miniWindowOpacity"]     = g_Settings.miniWindowOpacity;
     j["accentColorR"]          = g_Settings.accentColorR;
     j["accentColorG"]          = g_Settings.accentColorG;
     j["accentColorB"]          = g_Settings.accentColorB;
     j["enableSessionHistory"]  = g_Settings.enableSessionHistory;
-    j["enableSessionTimeline"] = g_Settings.enableSessionTimeline;
     j["maxSessionHistory"]     = g_Settings.maxSessionHistory;
     j["overwriteSessionHistory"] = g_Settings.overwriteSessionHistory;
     j["lastResetTimestamp"]    = g_Settings.lastResetTimestamp;
@@ -773,6 +782,7 @@ void SettingsManager::Save()
     // Favorites System
     j["enableFavorites"]       = g_Settings.enableFavorites;
     j["enableFavoritesTab"]    = g_Settings.enableFavoritesTab;
+    j["enableIgnoredTab"]      = g_Settings.enableIgnoredTab;
     j["enableProfitTab"]       = g_Settings.enableProfitTab;
     j["enableItemsTab"]        = g_Settings.enableItemsTab;
     j["enableCurrenciesTab"]   = g_Settings.enableCurrenciesTab;
@@ -831,6 +841,7 @@ void SettingsManager::Save()
     j["notificationEnableMinRarity"] = g_Settings.notificationEnableMinRarity;
     j["notificationMinRarity"] = g_Settings.notificationMinRarity;
     j["notificationCombineValueAndRarity"] = g_Settings.notificationCombineValueAndRarity;
+    j["notificationIncludeNonProfit"] = g_Settings.notificationIncludeNonProfit;
     j["notificationPrecursorAlert"] = g_Settings.notificationPrecursorAlert;
     j["notificationInfusionAlert"] = g_Settings.notificationInfusionAlert;
     j["notificationIncludeAgonyInfusions"] = g_Settings.notificationIncludeAgonyInfusions;
@@ -968,6 +979,7 @@ void SettingsManager::ExportToFile(const std::string& filePath)
     j["miniWindowShowTotalItems"] = g_Settings.miniWindowShowTotalItems;
     j["miniWindowShowSessionDuration"] = g_Settings.miniWindowShowSessionDuration;
     j["miniWindowClickThrough"] = g_Settings.miniWindowClickThrough;
+    j["miniWindowHideTitleBar"] = g_Settings.miniWindowHideTitleBar;
     j["mainWindowClickThrough"] = g_Settings.mainWindowClickThrough;
     j["miniWindowPosX"]         = g_Settings.miniWindowPosX;
     j["miniWindowPosY"]         = g_Settings.miniWindowPosY;
@@ -980,6 +992,9 @@ void SettingsManager::ExportToFile(const std::string& filePath)
     j["activeTab"]              = g_Settings.activeTab;
     j["enableGradientBackgrounds"] = g_Settings.enableGradientBackgrounds;
     j["showProfitSparkline"] = g_Settings.showProfitSparkline;
+    j["enableSummariesInProfitTab"] = g_Settings.enableSummariesInProfitTab;
+    j["enableBestDropHighlight"] = g_Settings.enableBestDropHighlight;
+    j["enableBestDropInMiniWindow"] = g_Settings.enableBestDropInMiniWindow;
     j["gradientTopColor"] = nlohmann::json::array();
     for (int i = 0; i < 4; i++)
         j["gradientTopColor"].push_back(g_Settings.gradientTopColor[i]);
@@ -988,19 +1003,33 @@ void SettingsManager::ExportToFile(const std::string& filePath)
         j["gradientBottomColor"].push_back(g_Settings.gradientBottomColor[i]);
     j["iconSize"]              = g_Settings.iconSize;
     j["gridIconSize"]          = g_Settings.gridIconSize;
+    j["gridIconSizeCurrencies"] = g_Settings.gridIconSizeCurrencies;
     j["showRarityBorder"]      = g_Settings.showRarityBorder;
+    j["rarityBorderSize"]      = g_Settings.rarityBorderSize;
     j["itemSortMode"]          = g_Settings.itemSortMode;
     j["itemRarityFilterMin"]   = g_Settings.itemRarityFilterMin;
     j["showItemIcons"]         = g_Settings.showItemIcons;
     j["groupByRarity"]         = g_Settings.groupByRarity;
     j["showRarityAsTabs"]      = g_Settings.showRarityAsTabs;
+    j["groupByType"]           = g_Settings.groupByType;
+    j["showTypeAsTabs"]        = g_Settings.showTypeAsTabs;
+    j["currencyGroupByCategory"] = g_Settings.currencyGroupByCategory;
+    j["currencyShowAsTabs"]    = g_Settings.currencyShowAsTabs;
+    j["lockTabOrder"]           = g_Settings.lockTabOrder;
+    j["miniWindowPosX"]         = g_Settings.miniWindowPosX;
+    j["miniWindowPosY"]         = g_Settings.miniWindowPosY;
+    j["miniWindowWidth"]        = g_Settings.miniWindowWidth;
+    j["miniWindowHeight"]       = g_Settings.miniWindowHeight;
+    j["mainWindowPosX"]         = g_Settings.mainWindowPosX;
+    j["mainWindowPosY"]         = g_Settings.mainWindowPosY;
+    j["mainWindowWidth"]        = g_Settings.mainWindowWidth;
+    j["mainWindowHeight"]       = g_Settings.mainWindowHeight;
     j["mainWindowOpacity"]     = g_Settings.mainWindowOpacity;
     j["miniWindowOpacity"]     = g_Settings.miniWindowOpacity;
     j["accentColorR"]          = g_Settings.accentColorR;
     j["accentColorG"]          = g_Settings.accentColorG;
     j["accentColorB"]          = g_Settings.accentColorB;
     j["enableSessionHistory"]  = g_Settings.enableSessionHistory;
-    j["enableSessionTimeline"] = g_Settings.enableSessionTimeline;
     j["maxSessionHistory"]     = g_Settings.maxSessionHistory;
     j["overwriteSessionHistory"] = g_Settings.overwriteSessionHistory;
     j["lastResetTimestamp"]    = g_Settings.lastResetTimestamp;
@@ -1092,6 +1121,11 @@ void SettingsManager::ExportToFile(const std::string& filePath)
     j["enableSearch"]          = g_Settings.enableSearch;
     j["searchTerm"]            = g_Settings.searchTerm;
     j["enableIgnoredItems"]    = g_Settings.enableIgnoredItems;
+    j["enableIconCache"]    = g_Settings.enableIconCache;
+    j["iconCacheMaxIcons"]  = g_Settings.iconCacheMaxIcons;
+    j["maxHistoryItems"]    = g_Settings.maxHistoryItems;
+    j["priceUpdateIntervalMin"] = g_Settings.priceUpdateIntervalMin;
+    j["disableComplexVisualsOnLowPerf"] = g_Settings.disableComplexVisualsOnLowPerf;
     j["countTextColor"] = g_Settings.countTextColor;
     j["countBackgroundColor"] = g_Settings.countBackgroundColor;
     j["countFontSize"] = g_Settings.countFontSize;
@@ -1101,11 +1135,13 @@ void SettingsManager::ExportToFile(const std::string& filePath)
     j["profitWindowDisplayMode"] = g_Settings.profitWindowDisplayMode;
     j["enableFavorites"] = g_Settings.enableFavorites;
     j["enableFavoritesTab"] = g_Settings.enableFavoritesTab;
+    j["enableIgnoredTab"] = g_Settings.enableIgnoredTab;
     j["enableProfitTab"] = g_Settings.enableProfitTab;
     j["enableItemsTab"] = g_Settings.enableItemsTab;
     j["enableCurrenciesTab"] = g_Settings.enableCurrenciesTab;
     j["enableFilterTab"] = g_Settings.enableFilterTab;
     j["enableSessionHistoryTab"] = g_Settings.enableSessionHistoryTab;
+    j["enableTimelineTab"] = g_Settings.enableTimelineTab;
     j["mainTabOrder"] = g_Settings.mainTabOrder;
     j["favoritesFirst"] = g_Settings.favoritesFirst;
     j["enableFavoriteTextColor"] = g_Settings.enableFavoriteTextColor;
@@ -1118,6 +1154,8 @@ void SettingsManager::ExportToFile(const std::string& filePath)
         j["favoriteRowColor"].push_back(g_Settings.favoriteRowColor[i]);
     j["enableGridViewItems"] = g_Settings.enableGridViewItems;
     j["enableGridViewCurrencies"] = g_Settings.enableGridViewCurrencies;
+    j["gridIconSize"] = g_Settings.gridIconSize;
+    j["gridIconSizeCurrencies"] = g_Settings.gridIconSizeCurrencies;
     j["showTopItems"] = g_Settings.showTopItems;
     j["showTopCurrencies"] = g_Settings.showTopCurrencies;
     j["enableDebugTab"] = g_Settings.enableDebugTab;
@@ -1132,8 +1170,6 @@ void SettingsManager::ExportToFile(const std::string& filePath)
         kitJson["useKarma"] = setting.useKarma;
         j["salvageKitSettings"][std::to_string(id)] = kitJson;
     }
-
-    // === Settings Profile System ===
     j["settingsProfiles"] = nlohmann::json::array();
     for (const auto& profile : g_Settings.settingsProfiles)
     {
@@ -1143,15 +1179,35 @@ void SettingsManager::ExportToFile(const std::string& filePath)
         j["settingsProfiles"].push_back(profileJson);
     }
     j["currentProfileIndex"] = g_Settings.currentProfileIndex;
-
-
-    // === Automatic Backups ===
     j["enableAutoBackups"] = g_Settings.enableAutoBackups;
     j["maxBackupCount"] = g_Settings.maxBackupCount;
     j["backupFrequency"] = g_Settings.backupFrequency;
-
-    // === Notification Settings ===
     j["enableNotifications"] = g_Settings.enableNotifications;
+    j["showNotificationSetup"] = g_Settings.showNotificationSetup;
+    j["notificationPosX"] = g_Settings.notificationPosX;
+    j["notificationPosY"] = g_Settings.notificationPosY;
+    j["notificationWidth"] = g_Settings.notificationWidth;
+    j["notificationHeight"] = g_Settings.notificationHeight;
+    j["notificationDuration"] = g_Settings.notificationDuration;
+    j["notificationEnableMinValue"] = g_Settings.notificationEnableMinValue;
+    j["notificationMinValueGold"] = g_Settings.notificationMinValueGold;
+    j["notificationEnableMinRarity"] = g_Settings.notificationEnableMinRarity;
+    j["notificationMinRarity"] = g_Settings.notificationMinRarity;
+    j["notificationCombineValueAndRarity"] = g_Settings.notificationCombineValueAndRarity;
+    j["notificationPrecursorAlert"] = g_Settings.notificationPrecursorAlert;
+    j["notificationInfusionAlert"] = g_Settings.notificationInfusionAlert;
+    j["notificationIncludeAgonyInfusions"] = g_Settings.notificationIncludeAgonyInfusions;
+    j["notificationStacking"] = g_Settings.notificationStacking;
+    j["notificationPlaySound"] = g_Settings.notificationPlaySound;
+    j["notificationVolume"] = g_Settings.notificationVolume;
+    j["notificationVolumeStandard"] = g_Settings.notificationVolumeStandard;
+    j["notificationVolumePrecursor"] = g_Settings.notificationVolumePrecursor;
+    j["notificationVolumeInfusion"] = g_Settings.notificationVolumeInfusion;
+    j["notificationVolumeAlert"] = g_Settings.notificationVolumeAlert;
+    j["soundPathStandard"] = g_Settings.soundPathStandard;
+    j["soundPathPrecursor"] = g_Settings.soundPathPrecursor;
+    j["soundPathInfusion"] = g_Settings.soundPathInfusion;
+    j["soundPathAlert"] = g_Settings.soundPathAlert;
     j["notifyProfitGoal"] = g_Settings.notifyProfitGoal;
     j["profitGoalAmount"] = g_Settings.profitGoalAmount;
     j["notifyResetWarning"] = g_Settings.notifyResetWarning;
@@ -1195,6 +1251,8 @@ void SettingsManager::ImportFromFile(const std::string& filePath)
 
         // Load all settings (same as Load() but from custom path)
         if (j.contains("language")) g_Settings.language = j["language"].get<std::string>();
+
+        // Multi-Account System
         if (j.contains("accounts") && j["accounts"].is_array())
         {
             g_Settings.accounts.clear();
@@ -1237,6 +1295,7 @@ void SettingsManager::ImportFromFile(const std::string& filePath)
         if (j.contains("miniWindowShowTotalItems")) g_Settings.miniWindowShowTotalItems = j["miniWindowShowTotalItems"].get<bool>();
         if (j.contains("miniWindowShowSessionDuration")) g_Settings.miniWindowShowSessionDuration = j["miniWindowShowSessionDuration"].get<bool>();
         if (j.contains("miniWindowClickThrough")) g_Settings.miniWindowClickThrough = j["miniWindowClickThrough"].get<bool>();
+        if (j.contains("miniWindowHideTitleBar")) g_Settings.miniWindowHideTitleBar = j["miniWindowHideTitleBar"].get<bool>();
         if (j.contains("mainWindowClickThrough")) g_Settings.mainWindowClickThrough = j["mainWindowClickThrough"].get<bool>();
         if (j.contains("miniWindowPosX")) g_Settings.miniWindowPosX = j["miniWindowPosX"].get<float>();
         if (j.contains("miniWindowPosY")) g_Settings.miniWindowPosY = j["miniWindowPosY"].get<float>();
@@ -1249,6 +1308,9 @@ void SettingsManager::ImportFromFile(const std::string& filePath)
         if (j.contains("activeTab")) g_Settings.activeTab = j["activeTab"].get<int>();
         if (j.contains("enableGradientBackgrounds")) g_Settings.enableGradientBackgrounds = j["enableGradientBackgrounds"].get<bool>();
         if (j.contains("showProfitSparkline")) g_Settings.showProfitSparkline = j["showProfitSparkline"].get<bool>();
+        if (j.contains("enableSummariesInProfitTab")) g_Settings.enableSummariesInProfitTab = j["enableSummariesInProfitTab"].get<bool>();
+        if (j.contains("enableBestDropHighlight")) g_Settings.enableBestDropHighlight = j["enableBestDropHighlight"].get<bool>();
+        if (j.contains("enableBestDropInMiniWindow")) g_Settings.enableBestDropInMiniWindow = j["enableBestDropInMiniWindow"].get<bool>();
         if (j.contains("gradientTopColor"))
         {
             auto arr = j["gradientTopColor"];
@@ -1267,170 +1329,213 @@ void SettingsManager::ImportFromFile(const std::string& filePath)
                     g_Settings.gradientBottomColor[i] = arr[i].get<float>();
             }
         }
-        if (j.contains("iconSize"))           g_Settings.iconSize           = j["iconSize"].get<int>();
-        if (j.contains("gridIconSize"))       g_Settings.gridIconSize       = j["gridIconSize"].get<int>();
-        if (j.contains("showRarityBorder"))   g_Settings.showRarityBorder   = j["showRarityBorder"].get<bool>();
-        if (j.contains("itemSortMode"))       g_Settings.itemSortMode       = j["itemSortMode"].get<int>();
-        if (j.contains("itemRarityFilterMin")) g_Settings.itemRarityFilterMin = j["itemRarityFilterMin"].get<int>();
-        if (j.contains("showItemIcons"))      g_Settings.showItemIcons      = j["showItemIcons"].get<bool>();
-        if (j.contains("groupByRarity"))      g_Settings.groupByRarity      = j["groupByRarity"].get<bool>();
-        if (j.contains("showRarityAsTabs"))  g_Settings.showRarityAsTabs  = j["showRarityAsTabs"].get<bool>();
-        if (j.contains("mainWindowOpacity")) g_Settings.mainWindowOpacity = j["mainWindowOpacity"].get<float>();
-        if (j.contains("miniWindowOpacity")) g_Settings.miniWindowOpacity = j["miniWindowOpacity"].get<float>();
-        if (j.contains("accentColorR")) g_Settings.accentColorR = j["accentColorR"].get<float>();
-        if (j.contains("accentColorG")) g_Settings.accentColorG = j["accentColorG"].get<float>();
-        if (j.contains("accentColorB")) g_Settings.accentColorB = j["accentColorB"].get<float>();
-        if (j.contains("enableSessionHistory")) g_Settings.enableSessionHistory = j["enableSessionHistory"].get<bool>();
-        if (j.contains("maxSessionHistory")) g_Settings.maxSessionHistory = j["maxSessionHistory"].get<int>();
-        // Migration: old key "saveAllItemsInHistory" → new key "enableSessionTimeline"
-        if (j.contains("enableSessionTimeline")) g_Settings.enableSessionTimeline = j["enableSessionTimeline"].get<bool>();
-        else if (j.contains("saveAllItemsInHistory")) g_Settings.enableSessionTimeline = j["saveAllItemsInHistory"].get<bool>();
+        if (j.contains("iconSize"))              g_Settings.iconSize              = j["iconSize"].get<int>();
+        if (j.contains("gridIconSize"))          g_Settings.gridIconSize          = j["gridIconSize"].get<int>();
+        if (j.contains("gridIconSizeCurrencies")) g_Settings.gridIconSizeCurrencies = j["gridIconSizeCurrencies"].get<int>();
+        if (j.contains("showRarityBorder"))      g_Settings.showRarityBorder      = j["showRarityBorder"].get<bool>();
+        if (j.contains("rarityBorderSize"))      g_Settings.rarityBorderSize      = j["rarityBorderSize"].get<float>();
+        if (j.contains("itemSortMode"))          g_Settings.itemSortMode          = j["itemSortMode"].get<int>();
+        if (j.contains("itemRarityFilterMin"))   g_Settings.itemRarityFilterMin   = j["itemRarityFilterMin"].get<int>();
+        if (j.contains("showItemIcons"))         g_Settings.showItemIcons         = j["showItemIcons"].get<bool>();
+        if (j.contains("groupByRarity"))         g_Settings.groupByRarity         = j["groupByRarity"].get<bool>();
+        if (j.contains("showRarityAsTabs"))      g_Settings.showRarityAsTabs      = j["showRarityAsTabs"].get<bool>();
+        if (j.contains("groupByType"))           g_Settings.groupByType           = j["groupByType"].get<bool>();
+        if (j.contains("showTypeAsTabs"))        g_Settings.showTypeAsTabs        = j["showTypeAsTabs"].get<bool>();
+        if (j.contains("currencyGroupByCategory")) g_Settings.currencyGroupByCategory = j["currencyGroupByCategory"].get<bool>();
+        if (j.contains("currencyShowAsTabs"))    g_Settings.currencyShowAsTabs    = j["currencyShowAsTabs"].get<bool>();
+        if (j.contains("lockTabOrder"))          g_Settings.lockTabOrder          = j["lockTabOrder"].get<bool>();
+        if (j.contains("mainWindowOpacity"))     g_Settings.mainWindowOpacity     = j["mainWindowOpacity"].get<float>();
+        if (j.contains("miniWindowOpacity"))     g_Settings.miniWindowOpacity     = j["miniWindowOpacity"].get<float>();
+        if (j.contains("accentColorR"))          g_Settings.accentColorR          = j["accentColorR"].get<float>();
+        if (j.contains("accentColorG"))          g_Settings.accentColorG          = j["accentColorG"].get<float>();
+        if (j.contains("accentColorB"))          g_Settings.accentColorB          = j["accentColorB"].get<float>();
+        if (j.contains("enableSessionHistory"))  g_Settings.enableSessionHistory  = j["enableSessionHistory"].get<bool>();
+        if (j.contains("maxSessionHistory"))     g_Settings.maxSessionHistory     = j["maxSessionHistory"].get<int>();
         if (j.contains("overwriteSessionHistory")) g_Settings.overwriteSessionHistory = j["overwriteSessionHistory"].get<bool>();
-        if (j.contains("lastResetTimestamp")) g_Settings.lastResetTimestamp = j["lastResetTimestamp"].get<std::string>();
+        if (j.contains("lastResetTimestamp"))    g_Settings.lastResetTimestamp    = j["lastResetTimestamp"].get<std::string>();
+
+        // === Advanced Settings ===
+        // Extended Filtering
         if (j.contains("filterSellableToVendor")) g_Settings.filterSellableToVendor = j["filterSellableToVendor"].get<bool>();
-        if (j.contains("filterSellableOnTp")) g_Settings.filterSellableOnTp = j["filterSellableOnTp"].get<bool>();
-        if (j.contains("filterCustomProfit")) g_Settings.filterCustomProfit = j["filterCustomProfit"].get<bool>();
-        if (j.contains("filterKnownByApi")) g_Settings.filterKnownByApi = j["filterKnownByApi"].get<bool>();
-        if (j.contains("filterUnknownByApi")) g_Settings.filterUnknownByApi = j["filterUnknownByApi"].get<bool>();
-        if (j.contains("filterAccountBound")) g_Settings.filterAccountBound = j["filterAccountBound"].get<bool>();
+        if (j.contains("filterSellableOnTp"))    g_Settings.filterSellableOnTp    = j["filterSellableOnTp"].get<bool>();
+        if (j.contains("filterCustomProfit"))    g_Settings.filterCustomProfit    = j["filterCustomProfit"].get<bool>();
+        if (j.contains("filterKnownByApi"))      g_Settings.filterKnownByApi      = j["filterKnownByApi"].get<bool>();
+        if (j.contains("filterUnknownByApi"))    g_Settings.filterUnknownByApi    = j["filterUnknownByApi"].get<bool>();
+
+        // Additional Filters
+        if (j.contains("filterAccountBound"))    g_Settings.filterAccountBound    = j["filterAccountBound"].get<bool>();
         if (j.contains("filterNotAccountBound")) g_Settings.filterNotAccountBound = j["filterNotAccountBound"].get<bool>();
-        if (j.contains("filterNoSell")) g_Settings.filterNoSell = j["filterNoSell"].get<bool>();
-        if (j.contains("filterNotNoSell")) g_Settings.filterNotNoSell = j["filterNotNoSell"].get<bool>();
-        if (j.contains("filterFavorite")) g_Settings.filterFavorite = j["filterFavorite"].get<bool>();
-        if (j.contains("filterNotFavorite")) g_Settings.filterNotFavorite = j["filterNotFavorite"].get<bool>();
-        if (j.contains("filterIgnored")) g_Settings.filterIgnored = j["filterIgnored"].get<bool>();
-        if (j.contains("filterNotIgnored")) g_Settings.filterNotIgnored = j["filterNotIgnored"].get<bool>();
-        if (j.contains("showRangeFilters")) g_Settings.showRangeFilters = j["showRangeFilters"].get<bool>();
-        
-        // Load new separate gold/silver/copper fields
-        if (j.contains("filterMinPriceGold")) g_Settings.filterMinPriceGold = j["filterMinPriceGold"].get<int>();
-        if (j.contains("filterMinPriceSilver")) g_Settings.filterMinPriceSilver = j["filterMinPriceSilver"].get<int>();
-        if (j.contains("filterMinPriceCopper")) g_Settings.filterMinPriceCopper = j["filterMinPriceCopper"].get<int>();
-        if (j.contains("filterMaxPriceGold")) g_Settings.filterMaxPriceGold = j["filterMaxPriceGold"].get<int>();
-        if (j.contains("filterMaxPriceSilver")) g_Settings.filterMaxPriceSilver = j["filterMaxPriceSilver"].get<int>();
-        if (j.contains("filterMaxPriceCopper")) g_Settings.filterMaxPriceCopper = j["filterMaxPriceCopper"].get<int>();
-        
+        if (j.contains("filterNoSell"))          g_Settings.filterNoSell          = j["filterNoSell"].get<bool>();
+        if (j.contains("filterNotNoSell"))       g_Settings.filterNotNoSell       = j["filterNotNoSell"].get<bool>();
+        if (j.contains("filterFavorite"))        g_Settings.filterFavorite        = j["filterFavorite"].get<bool>();
+        if (j.contains("filterNotFavorite"))     g_Settings.filterNotFavorite     = j["filterNotFavorite"].get<bool>();
+        if (j.contains("filterIgnored"))         g_Settings.filterIgnored         = j["filterIgnored"].get<bool>();
+        if (j.contains("filterNotIgnored"))      g_Settings.filterNotIgnored      = j["filterNotIgnored"].get<bool>();
+
+        // Range Filters
+        if (j.contains("showRangeFilters"))      g_Settings.showRangeFilters      = j["showRangeFilters"].get<bool>();
+        if (j.contains("filterMinPriceGold"))    g_Settings.filterMinPriceGold    = j["filterMinPriceGold"].get<int>();
+        if (j.contains("filterMinPriceSilver"))  g_Settings.filterMinPriceSilver  = j["filterMinPriceSilver"].get<int>();
+        if (j.contains("filterMinPriceCopper"))  g_Settings.filterMinPriceCopper  = j["filterMinPriceCopper"].get<int>();
+        if (j.contains("filterMaxPriceGold"))    g_Settings.filterMaxPriceGold    = j["filterMaxPriceGold"].get<int>();
+        if (j.contains("filterMaxPriceSilver"))  g_Settings.filterMaxPriceSilver  = j["filterMaxPriceSilver"].get<int>();
+        if (j.contains("filterMaxPriceCopper"))  g_Settings.filterMaxPriceCopper  = j["filterMaxPriceCopper"].get<int>();
         // Backward compatibility: convert old single copper value to gold/silver/copper
         if (j.contains("filterMinPrice") && !j.contains("filterMinPriceGold"))
         {
             int oldMinPrice = j["filterMinPrice"].get<int>();
-            g_Settings.filterMinPriceGold = oldMinPrice / 10000;
+            g_Settings.filterMinPriceGold   = oldMinPrice / 10000;
             g_Settings.filterMinPriceSilver = (oldMinPrice % 10000) / 100;
             g_Settings.filterMinPriceCopper = oldMinPrice % 100;
         }
         if (j.contains("filterMaxPrice") && !j.contains("filterMaxPriceGold"))
         {
             int oldMaxPrice = j["filterMaxPrice"].get<int>();
-            g_Settings.filterMaxPriceGold = oldMaxPrice / 10000;
+            g_Settings.filterMaxPriceGold   = oldMaxPrice / 10000;
             g_Settings.filterMaxPriceSilver = (oldMaxPrice % 10000) / 100;
             g_Settings.filterMaxPriceCopper = oldMaxPrice % 100;
         }
-        
-        if (j.contains("filterMinQuantity")) g_Settings.filterMinQuantity = j["filterMinQuantity"].get<int>();
-        if (j.contains("filterMaxQuantity")) g_Settings.filterMaxQuantity = j["filterMaxQuantity"].get<int>();
-        if (j.contains("filterTypeArmor")) g_Settings.filterTypeArmor = j["filterTypeArmor"].get<bool>();
-        if (j.contains("filterTypeWeapon")) g_Settings.filterTypeWeapon = j["filterTypeWeapon"].get<bool>();
-        if (j.contains("filterTypeTrinket")) g_Settings.filterTypeTrinket = j["filterTypeTrinket"].get<bool>();
-        if (j.contains("filterTypeGizmo")) g_Settings.filterTypeGizmo = j["filterTypeGizmo"].get<bool>();
+        if (j.contains("filterMinQuantity"))     g_Settings.filterMinQuantity     = j["filterMinQuantity"].get<int>();
+        if (j.contains("filterMaxQuantity"))     g_Settings.filterMaxQuantity     = j["filterMaxQuantity"].get<int>();
+
+        // Item Type Filters
+        if (j.contains("filterTypeArmor"))            g_Settings.filterTypeArmor            = j["filterTypeArmor"].get<bool>();
+        if (j.contains("filterTypeWeapon"))           g_Settings.filterTypeWeapon           = j["filterTypeWeapon"].get<bool>();
+        if (j.contains("filterTypeTrinket"))          g_Settings.filterTypeTrinket          = j["filterTypeTrinket"].get<bool>();
+        if (j.contains("filterTypeGizmo"))            g_Settings.filterTypeGizmo            = j["filterTypeGizmo"].get<bool>();
         if (j.contains("filterTypeCraftingMaterial")) g_Settings.filterTypeCraftingMaterial = j["filterTypeCraftingMaterial"].get<bool>();
-        if (j.contains("filterTypeConsumable")) g_Settings.filterTypeConsumable = j["filterTypeConsumable"].get<bool>();
-        if (j.contains("filterTypeGatheringTool")) g_Settings.filterTypeGatheringTool = j["filterTypeGatheringTool"].get<bool>();
-        if (j.contains("filterTypeBag")) g_Settings.filterTypeBag = j["filterTypeBag"].get<bool>();
-        if (j.contains("filterTypeContainer")) g_Settings.filterTypeContainer = j["filterTypeContainer"].get<bool>();
-        if (j.contains("filterTypeMiniPet")) g_Settings.filterTypeMiniPet = j["filterTypeMiniPet"].get<bool>();
-        if (j.contains("filterTypeGizmoContainer")) g_Settings.filterTypeGizmoContainer = j["filterTypeGizmoContainer"].get<bool>();
-        if (j.contains("filterTypeBackpack")) g_Settings.filterTypeBackpack = j["filterTypeBackpack"].get<bool>();
+        if (j.contains("filterTypeConsumable"))       g_Settings.filterTypeConsumable       = j["filterTypeConsumable"].get<bool>();
+        if (j.contains("filterTypeGatheringTool"))    g_Settings.filterTypeGatheringTool    = j["filterTypeGatheringTool"].get<bool>();
+        if (j.contains("filterTypeBag"))              g_Settings.filterTypeBag              = j["filterTypeBag"].get<bool>();
+        if (j.contains("filterTypeContainer"))        g_Settings.filterTypeContainer        = j["filterTypeContainer"].get<bool>();
+        if (j.contains("filterTypeMiniPet"))          g_Settings.filterTypeMiniPet          = j["filterTypeMiniPet"].get<bool>();
+        if (j.contains("filterTypeGizmoContainer"))   g_Settings.filterTypeGizmoContainer   = j["filterTypeGizmoContainer"].get<bool>();
+        if (j.contains("filterTypeBackpack"))         g_Settings.filterTypeBackpack         = j["filterTypeBackpack"].get<bool>();
         if (j.contains("filterTypeUpgradeComponent")) g_Settings.filterTypeUpgradeComponent = j["filterTypeUpgradeComponent"].get<bool>();
-        if (j.contains("filterTypeTool")) g_Settings.filterTypeTool = j["filterTypeTool"].get<bool>();
-        if (j.contains("filterTypeTrophy")) g_Settings.filterTypeTrophy = j["filterTypeTrophy"].get<bool>();
-        if (j.contains("filterTypeUnlock")) g_Settings.filterTypeUnlock = j["filterTypeUnlock"].get<bool>();
-        if (j.contains("filterKarma")) g_Settings.filterKarma = j["filterKarma"].get<bool>();
-        if (j.contains("filterLaurel")) g_Settings.filterLaurel = j["filterLaurel"].get<bool>();
-        if (j.contains("filterGem")) g_Settings.filterGem = j["filterGem"].get<bool>();
-        if (j.contains("filterFractalRelic")) g_Settings.filterFractalRelic = j["filterFractalRelic"].get<bool>();
-        if (j.contains("filterBadgeOfHonor")) g_Settings.filterBadgeOfHonor = j["filterBadgeOfHonor"].get<bool>();
-        if (j.contains("filterGuildCommendation")) g_Settings.filterGuildCommendation = j["filterGuildCommendation"].get<bool>();
-        if (j.contains("filterTransmutationCharge")) g_Settings.filterTransmutationCharge = j["filterTransmutationCharge"].get<bool>();
-        if (j.contains("filterSpiritShards")) g_Settings.filterSpiritShards = j["filterSpiritShards"].get<bool>();
-        if (j.contains("filterUnboundMagic")) g_Settings.filterUnboundMagic = j["filterUnboundMagic"].get<bool>();
-        if (j.contains("filterVolatileMagic")) g_Settings.filterVolatileMagic = j["filterVolatileMagic"].get<bool>();
-        if (j.contains("filterAirshipParts")) g_Settings.filterAirshipParts = j["filterAirshipParts"].get<bool>();
-        if (j.contains("filterGeode")) g_Settings.filterGeode = j["filterGeode"].get<bool>();
-        if (j.contains("filterLeyLineCrystals")) g_Settings.filterLeyLineCrystals = j["filterLeyLineCrystals"].get<bool>();
-        if (j.contains("filterTradeContracts")) g_Settings.filterTradeContracts = j["filterTradeContracts"].get<bool>();
-        if (j.contains("filterElegyMosaic")) g_Settings.filterElegyMosaic = j["filterElegyMosaic"].get<bool>();
-        if (j.contains("filterUncommonCoins")) g_Settings.filterUncommonCoins = j["filterUncommonCoins"].get<bool>();
-        if (j.contains("filterAstralAcclaim")) g_Settings.filterAstralAcclaim = j["filterAstralAcclaim"].get<bool>();
-        if (j.contains("filterPristineFractalRelics")) g_Settings.filterPristineFractalRelics = j["filterPristineFractalRelics"].get<bool>();
-        if (j.contains("filterUnstableFractalEssence")) g_Settings.filterUnstableFractalEssence = j["filterUnstableFractalEssence"].get<bool>();
-        if (j.contains("filterMagnetiteShards")) g_Settings.filterMagnetiteShards = j["filterMagnetiteShards"].get<bool>();
-        if (j.contains("filterGaetingCrystals")) g_Settings.filterGaetingCrystals = j["filterGaetingCrystals"].get<bool>();
-        if (j.contains("filterProphetShards")) g_Settings.filterProphetShards = j["filterProphetShards"].get<bool>();
-        if (j.contains("filterGreenProphetShards")) g_Settings.filterGreenProphetShards = j["filterGreenProphetShards"].get<bool>();
-        if (j.contains("filterWvWSkirmishTickets")) g_Settings.filterWvWSkirmishTickets = j["filterWvWSkirmishTickets"].get<bool>();
-        if (j.contains("filterProofsOfHeroics")) g_Settings.filterProofsOfHeroics = j["filterProofsOfHeroics"].get<bool>();
-        if (j.contains("filterPvpLeagueTickets")) g_Settings.filterPvpLeagueTickets = j["filterPvpLeagueTickets"].get<bool>();
-        if (j.contains("filterAscendedShardsOfGlory")) g_Settings.filterAscendedShardsOfGlory = j["filterAscendedShardsOfGlory"].get<bool>();
-        if (j.contains("filterResearchNotes")) g_Settings.filterResearchNotes = j["filterResearchNotes"].get<bool>();
-        if (j.contains("filterTyrianDefenseSeal")) g_Settings.filterTyrianDefenseSeal = j["filterTyrianDefenseSeal"].get<bool>();
+        if (j.contains("filterTypeTool"))             g_Settings.filterTypeTool             = j["filterTypeTool"].get<bool>();
+        if (j.contains("filterTypeTrophy"))           g_Settings.filterTypeTrophy           = j["filterTypeTrophy"].get<bool>();
+        if (j.contains("filterTypeUnlock"))           g_Settings.filterTypeUnlock           = j["filterTypeUnlock"].get<bool>();
+
+        // Currency Filters
+        if (j.contains("filterKarma"))                    g_Settings.filterKarma                    = j["filterKarma"].get<bool>();
+        if (j.contains("filterLaurel"))                   g_Settings.filterLaurel                   = j["filterLaurel"].get<bool>();
+        if (j.contains("filterGem"))                      g_Settings.filterGem                      = j["filterGem"].get<bool>();
+        if (j.contains("filterFractalRelic"))             g_Settings.filterFractalRelic             = j["filterFractalRelic"].get<bool>();
+        if (j.contains("filterBadgeOfHonor"))             g_Settings.filterBadgeOfHonor             = j["filterBadgeOfHonor"].get<bool>();
+        if (j.contains("filterGuildCommendation"))        g_Settings.filterGuildCommendation        = j["filterGuildCommendation"].get<bool>();
+        if (j.contains("filterTransmutationCharge"))      g_Settings.filterTransmutationCharge      = j["filterTransmutationCharge"].get<bool>();
+        if (j.contains("filterSpiritShards"))             g_Settings.filterSpiritShards             = j["filterSpiritShards"].get<bool>();
+        if (j.contains("filterUnboundMagic"))             g_Settings.filterUnboundMagic             = j["filterUnboundMagic"].get<bool>();
+        if (j.contains("filterVolatileMagic"))            g_Settings.filterVolatileMagic            = j["filterVolatileMagic"].get<bool>();
+        if (j.contains("filterAirshipParts"))             g_Settings.filterAirshipParts             = j["filterAirshipParts"].get<bool>();
+        if (j.contains("filterGeode"))                    g_Settings.filterGeode                    = j["filterGeode"].get<bool>();
+        if (j.contains("filterLeyLineCrystals"))          g_Settings.filterLeyLineCrystals          = j["filterLeyLineCrystals"].get<bool>();
+        if (j.contains("filterTradeContracts"))           g_Settings.filterTradeContracts           = j["filterTradeContracts"].get<bool>();
+        if (j.contains("filterElegyMosaic"))              g_Settings.filterElegyMosaic              = j["filterElegyMosaic"].get<bool>();
+        if (j.contains("filterUncommonCoins"))            g_Settings.filterUncommonCoins            = j["filterUncommonCoins"].get<bool>();
+        if (j.contains("filterAstralAcclaim"))            g_Settings.filterAstralAcclaim            = j["filterAstralAcclaim"].get<bool>();
+        if (j.contains("filterPristineFractalRelics"))    g_Settings.filterPristineFractalRelics    = j["filterPristineFractalRelics"].get<bool>();
+        if (j.contains("filterUnstableFractalEssence"))   g_Settings.filterUnstableFractalEssence   = j["filterUnstableFractalEssence"].get<bool>();
+        if (j.contains("filterMagnetiteShards"))          g_Settings.filterMagnetiteShards          = j["filterMagnetiteShards"].get<bool>();
+        if (j.contains("filterGaetingCrystals"))          g_Settings.filterGaetingCrystals          = j["filterGaetingCrystals"].get<bool>();
+        if (j.contains("filterProphetShards"))            g_Settings.filterProphetShards            = j["filterProphetShards"].get<bool>();
+        if (j.contains("filterGreenProphetShards"))       g_Settings.filterGreenProphetShards       = j["filterGreenProphetShards"].get<bool>();
+        if (j.contains("filterWvWSkirmishTickets"))       g_Settings.filterWvWSkirmishTickets       = j["filterWvWSkirmishTickets"].get<bool>();
+        if (j.contains("filterProofsOfHeroics"))          g_Settings.filterProofsOfHeroics          = j["filterProofsOfHeroics"].get<bool>();
+        if (j.contains("filterPvpLeagueTickets"))         g_Settings.filterPvpLeagueTickets         = j["filterPvpLeagueTickets"].get<bool>();
+        if (j.contains("filterAscendedShardsOfGlory"))   g_Settings.filterAscendedShardsOfGlory   = j["filterAscendedShardsOfGlory"].get<bool>();
+        if (j.contains("filterResearchNotes"))            g_Settings.filterResearchNotes            = j["filterResearchNotes"].get<bool>();
+        if (j.contains("filterTyrianDefenseSeal"))        g_Settings.filterTyrianDefenseSeal        = j["filterTyrianDefenseSeal"].get<bool>();
         if (j.contains("filterTestimonyOfDesertHeroics")) g_Settings.filterTestimonyOfDesertHeroics = j["filterTestimonyOfDesertHeroics"].get<bool>();
-        if (j.contains("filterTestimonyOfJadeHeroics")) g_Settings.filterTestimonyOfJadeHeroics = j["filterTestimonyOfJadeHeroics"].get<bool>();
+        if (j.contains("filterTestimonyOfJadeHeroics"))   g_Settings.filterTestimonyOfJadeHeroics   = j["filterTestimonyOfJadeHeroics"].get<bool>();
         if (j.contains("filterTestimonyOfCastoranHeroics")) g_Settings.filterTestimonyOfCastoranHeroics = j["filterTestimonyOfCastoranHeroics"].get<bool>();
-        if (j.contains("filterLegendaryInsight")) g_Settings.filterLegendaryInsight = j["filterLegendaryInsight"].get<bool>();
-        if (j.contains("filterTalesOfDungeonDelving")) g_Settings.filterTalesOfDungeonDelving = j["filterTalesOfDungeonDelving"].get<bool>();
-        if (j.contains("filterImperialFavor")) g_Settings.filterImperialFavor = j["filterImperialFavor"].get<bool>();
-        if (j.contains("filterCanachCoins")) g_Settings.filterCanachCoins = j["filterCanachCoins"].get<bool>();
-        if (j.contains("filterAncientCoin")) g_Settings.filterAncientCoin = j["filterAncientCoin"].get<bool>();
-        if (j.contains("filterUnusualCoin")) g_Settings.filterUnusualCoin = j["filterUnusualCoin"].get<bool>();
-        if (j.contains("filterJadeSliver")) g_Settings.filterJadeSliver = j["filterJadeSliver"].get<bool>();
-        if (j.contains("filterStaticCharge")) g_Settings.filterStaticCharge = j["filterStaticCharge"].get<bool>();
-        if (j.contains("filterPinchOfStardust")) g_Settings.filterPinchOfStardust = j["filterPinchOfStardust"].get<bool>();
-        if (j.contains("filterCalcifiedGasp")) g_Settings.filterCalcifiedGasp = j["filterCalcifiedGasp"].get<bool>();
-        if (j.contains("filterUrsusOblige")) g_Settings.filterUrsusOblige = j["filterUrsusOblige"].get<bool>();
-        if (j.contains("filterGaetingCrystalJanthir")) g_Settings.filterGaetingCrystalJanthir = j["filterGaetingCrystalJanthir"].get<bool>();
-        if (j.contains("filterAntiquatedDucat")) g_Settings.filterAntiquatedDucat = j["filterAntiquatedDucat"].get<bool>();
-        if (j.contains("filterAetherRichSap")) g_Settings.filterAetherRichSap = j["filterAetherRichSap"].get<bool>();
-        if (j.contains("enableCustomProfit")) g_Settings.enableCustomProfit = j["enableCustomProfit"].get<bool>();
-        if (j.contains("enableSearch")) g_Settings.enableSearch = j["enableSearch"].get<bool>();
-        if (j.contains("searchTerm")) g_Settings.searchTerm = j["searchTerm"].get<std::string>();
-        if (j.contains("enableIgnoredItems")) g_Settings.enableIgnoredItems = j["enableIgnoredItems"].get<bool>();
-        if (j.contains("countTextColor")) g_Settings.countTextColor = j["countTextColor"].get<int>();
-        if (j.contains("countBackgroundColor")) g_Settings.countBackgroundColor = j["countBackgroundColor"].get<int>();
-        if (j.contains("countFontSize")) g_Settings.countFontSize = j["countFontSize"].get<int>();
+        if (j.contains("filterLegendaryInsight"))         g_Settings.filterLegendaryInsight         = j["filterLegendaryInsight"].get<bool>();
+        if (j.contains("filterTalesOfDungeonDelving"))    g_Settings.filterTalesOfDungeonDelving    = j["filterTalesOfDungeonDelving"].get<bool>();
+        if (j.contains("filterImperialFavor"))            g_Settings.filterImperialFavor            = j["filterImperialFavor"].get<bool>();
+        if (j.contains("filterCanachCoins"))              g_Settings.filterCanachCoins              = j["filterCanachCoins"].get<bool>();
+        if (j.contains("filterAncientCoin"))              g_Settings.filterAncientCoin              = j["filterAncientCoin"].get<bool>();
+        if (j.contains("filterUnusualCoin"))              g_Settings.filterUnusualCoin              = j["filterUnusualCoin"].get<bool>();
+        if (j.contains("filterJadeSliver"))               g_Settings.filterJadeSliver               = j["filterJadeSliver"].get<bool>();
+        if (j.contains("filterStaticCharge"))             g_Settings.filterStaticCharge             = j["filterStaticCharge"].get<bool>();
+        if (j.contains("filterPinchOfStardust"))          g_Settings.filterPinchOfStardust          = j["filterPinchOfStardust"].get<bool>();
+        if (j.contains("filterCalcifiedGasp"))            g_Settings.filterCalcifiedGasp            = j["filterCalcifiedGasp"].get<bool>();
+        if (j.contains("filterUrsusOblige"))              g_Settings.filterUrsusOblige              = j["filterUrsusOblige"].get<bool>();
+        if (j.contains("filterGaetingCrystalJanthir"))   g_Settings.filterGaetingCrystalJanthir   = j["filterGaetingCrystalJanthir"].get<bool>();
+        if (j.contains("filterAntiquatedDucat"))          g_Settings.filterAntiquatedDucat          = j["filterAntiquatedDucat"].get<bool>();
+        if (j.contains("filterAetherRichSap"))            g_Settings.filterAetherRichSap            = j["filterAetherRichSap"].get<bool>();
+
+        // Custom Profit System
+        if (j.contains("enableCustomProfit"))    g_Settings.enableCustomProfit    = j["enableCustomProfit"].get<bool>();
+
+        // Search
+        if (j.contains("enableSearch"))          g_Settings.enableSearch          = j["enableSearch"].get<bool>();
+        if (j.contains("searchTerm"))            g_Settings.searchTerm            = j["searchTerm"].get<std::string>();
+
+        // Ignored Items
+        if (j.contains("enableIgnoredItems"))    g_Settings.enableIgnoredItems    = j["enableIgnoredItems"].get<bool>();
+        if (j.contains("enableIgnoredTab"))      g_Settings.enableIgnoredTab      = j["enableIgnoredTab"].get<bool>();
+
+        // Performance Settings
+        if (j.contains("enableIconCache"))             g_Settings.enableIconCache             = j["enableIconCache"].get<bool>();
+        if (j.contains("iconCacheMaxIcons"))           g_Settings.iconCacheMaxIcons           = j["iconCacheMaxIcons"].get<int>();
+        if (j.contains("maxHistoryItems"))             g_Settings.maxHistoryItems             = j["maxHistoryItems"].get<int>();
+        if (j.contains("priceUpdateIntervalMin"))      g_Settings.priceUpdateIntervalMin      = j["priceUpdateIntervalMin"].get<int>();
+        if (j.contains("disableComplexVisualsOnLowPerf")) g_Settings.disableComplexVisualsOnLowPerf = j["disableComplexVisualsOnLowPerf"].get<bool>();
+
+        // Count Display Settings
+        if (j.contains("countTextColor"))          g_Settings.countTextColor          = j["countTextColor"].get<int>();
+        if (j.contains("countBackgroundColor"))    g_Settings.countBackgroundColor    = j["countBackgroundColor"].get<int>();
+        if (j.contains("countFontSize"))           g_Settings.countFontSize           = j["countFontSize"].get<int>();
         if (j.contains("countHorizontalAlignment")) g_Settings.countHorizontalAlignment = j["countHorizontalAlignment"].get<int>();
-        if (j.contains("profitLabelText")) g_Settings.profitLabelText = j["profitLabelText"].get<std::string>();
-        if (j.contains("profitPerHourLabelText")) g_Settings.profitPerHourLabelText = j["profitPerHourLabelText"].get<std::string>();
+
+        // Profit Labels
+        if (j.contains("profitLabelText"))         g_Settings.profitLabelText         = j["profitLabelText"].get<std::string>();
+        if (j.contains("profitPerHourLabelText"))  g_Settings.profitPerHourLabelText  = j["profitPerHourLabelText"].get<std::string>();
         if (j.contains("profitWindowDisplayMode")) g_Settings.profitWindowDisplayMode = j["profitWindowDisplayMode"].get<int>();
-        if (j.contains("enableFavorites")) g_Settings.enableFavorites = j["enableFavorites"].get<bool>();
-        if (j.contains("enableFavoritesTab")) g_Settings.enableFavoritesTab = j["enableFavoritesTab"].get<bool>();
-        if (j.contains("enableProfitTab")) g_Settings.enableProfitTab = j["enableProfitTab"].get<bool>();
-        if (j.contains("enableItemsTab")) g_Settings.enableItemsTab = j["enableItemsTab"].get<bool>();
-        if (j.contains("enableCurrenciesTab")) g_Settings.enableCurrenciesTab = j["enableCurrenciesTab"].get<bool>();
-        if (j.contains("enableFilterTab")) g_Settings.enableFilterTab = j["enableFilterTab"].get<bool>();
+
+        // Favorites System
+        if (j.contains("enableFavorites"))         g_Settings.enableFavorites         = j["enableFavorites"].get<bool>();
+        if (j.contains("enableFavoritesTab"))      g_Settings.enableFavoritesTab      = j["enableFavoritesTab"].get<bool>();
+        if (j.contains("enableProfitTab"))         g_Settings.enableProfitTab         = j["enableProfitTab"].get<bool>();
+        if (j.contains("enableItemsTab"))          g_Settings.enableItemsTab          = j["enableItemsTab"].get<bool>();
+        if (j.contains("enableCurrenciesTab"))     g_Settings.enableCurrenciesTab     = j["enableCurrenciesTab"].get<bool>();
+        if (j.contains("enableFilterTab"))         g_Settings.enableFilterTab         = j["enableFilterTab"].get<bool>();
         if (j.contains("enableSessionHistoryTab")) g_Settings.enableSessionHistoryTab = j["enableSessionHistoryTab"].get<bool>();
-        if (j.contains("mainTabOrder")) g_Settings.mainTabOrder = j["mainTabOrder"].get<std::vector<std::string>>();
-        if (j.contains("favoritesFirst")) g_Settings.favoritesFirst = j["favoritesFirst"].get<bool>();
+        if (j.contains("enableTimelineTab"))       g_Settings.enableTimelineTab       = j["enableTimelineTab"].get<bool>();
+        if (j.contains("favoritesFirst"))          g_Settings.favoritesFirst          = j["favoritesFirst"].get<bool>();
         if (j.contains("enableFavoriteTextColor")) g_Settings.enableFavoriteTextColor = j["enableFavoriteTextColor"].get<bool>();
         if (j.contains("favoriteTextColor") && j["favoriteTextColor"].is_array() && j["favoriteTextColor"].size() == 4)
         {
             for (int i = 0; i < 4; i++)
                 g_Settings.favoriteTextColor[i] = j["favoriteTextColor"][i].get<float>();
         }
-        if (j.contains("enableFavoriteRowColor")) g_Settings.enableFavoriteRowColor = j["enableFavoriteRowColor"].get<bool>();
+        if (j.contains("enableFavoriteRowColor"))  g_Settings.enableFavoriteRowColor  = j["enableFavoriteRowColor"].get<bool>();
         if (j.contains("favoriteRowColor") && j["favoriteRowColor"].is_array() && j["favoriteRowColor"].size() == 4)
         {
             for (int i = 0; i < 4; i++)
                 g_Settings.favoriteRowColor[i] = j["favoriteRowColor"][i].get<float>();
         }
-        if (j.contains("enableGridView")) g_Settings.enableGridViewItems = j["enableGridView"].get<bool>(); // Migration from old setting
-        if (j.contains("enableGridViewItems")) g_Settings.enableGridViewItems = j["enableGridViewItems"].get<bool>();
+
+        // Grid View Settings
+        if (j.contains("enableGridView"))          g_Settings.enableGridViewItems     = j["enableGridView"].get<bool>(); // Migration from old setting
+        if (j.contains("enableGridViewItems"))     g_Settings.enableGridViewItems     = j["enableGridViewItems"].get<bool>();
         if (j.contains("enableGridViewCurrencies")) g_Settings.enableGridViewCurrencies = j["enableGridViewCurrencies"].get<bool>();
-        if (j.contains("showTopItems")) g_Settings.showTopItems = j["showTopItems"].get<bool>();
-        if (j.contains("showTopCurrencies")) g_Settings.showTopCurrencies = j["showTopCurrencies"].get<bool>();
-        if (j.contains("enableDebugTab")) g_Settings.enableDebugTab = j["enableDebugTab"].get<bool>();
-        if (j.contains("useFakeDrfServer")) g_Settings.useFakeDrfServer = j["useFakeDrfServer"].get<bool>();
-        if (j.contains("gw2ApiConnectTimeout")) g_Settings.gw2ApiConnectTimeout = j["gw2ApiConnectTimeout"].get<int>();
-        if (j.contains("gw2ApiReceiveTimeout")) g_Settings.gw2ApiReceiveTimeout = j["gw2ApiReceiveTimeout"].get<int>();
+        if (j.contains("gridIconSize"))            g_Settings.gridIconSize            = j["gridIconSize"].get<int>();
+        if (j.contains("gridIconSizeCurrencies"))  g_Settings.gridIconSizeCurrencies  = j["gridIconSizeCurrencies"].get<int>();
+
+        // UI State Settings
+        if (j.contains("showTopItems"))            g_Settings.showTopItems            = j["showTopItems"].get<bool>();
+        if (j.contains("showTopCurrencies"))       g_Settings.showTopCurrencies       = j["showTopCurrencies"].get<bool>();
+
+        // Debug Features
+        if (j.contains("enableDebugTab"))          g_Settings.enableDebugTab          = j["enableDebugTab"].get<bool>();
+        if (j.contains("useFakeDrfServer"))        g_Settings.useFakeDrfServer        = j["useFakeDrfServer"].get<bool>();
+
+        // API Timeouts
+        if (j.contains("gw2ApiConnectTimeout"))    g_Settings.gw2ApiConnectTimeout    = j["gw2ApiConnectTimeout"].get<int>();
+        if (j.contains("gw2ApiReceiveTimeout"))    g_Settings.gw2ApiReceiveTimeout    = j["gw2ApiReceiveTimeout"].get<int>();
+
+        // Salvage Kits Settings
         if (j.contains("salvageKitSettings") && j["salvageKitSettings"].is_object())
         {
             for (auto& [idStr, kitSetting] : j["salvageKitSettings"].items())
@@ -1450,6 +1555,64 @@ void SettingsManager::ImportFromFile(const std::string& filePath)
                 }
             }
         }
+
+        // Settings Profiles
+        if (j.contains("settingsProfiles") && j["settingsProfiles"].is_array())
+        {
+            g_Settings.settingsProfiles.clear();
+            for (const auto& profileJson : j["settingsProfiles"])
+            {
+                Settings::SettingsProfile profile;
+                if (profileJson.contains("name")) profile.name = profileJson["name"].get<std::string>();
+                if (profileJson.contains("profileData")) profile.profileData = profileJson["profileData"].get<std::string>();
+                g_Settings.settingsProfiles.push_back(profile);
+            }
+        }
+        if (j.contains("currentProfileIndex")) g_Settings.currentProfileIndex = j["currentProfileIndex"].get<int>();
+
+        // Automatic Backups
+        if (j.contains("enableAutoBackups"))  g_Settings.enableAutoBackups  = j["enableAutoBackups"].get<bool>();
+        if (j.contains("maxBackupCount"))     g_Settings.maxBackupCount     = j["maxBackupCount"].get<int>();
+        if (j.contains("backupFrequency"))    g_Settings.backupFrequency    = j["backupFrequency"].get<int>();
+
+        // Notification Settings
+        if (j.contains("enableNotifications"))            g_Settings.enableNotifications            = j["enableNotifications"].get<bool>();
+        if (j.contains("showNotificationSetup"))          g_Settings.showNotificationSetup          = j["showNotificationSetup"].get<bool>();
+        if (j.contains("notificationPosX"))               g_Settings.notificationPosX               = j["notificationPosX"].get<float>();
+        if (j.contains("notificationPosY"))               g_Settings.notificationPosY               = j["notificationPosY"].get<float>();
+        if (j.contains("notificationWidth"))              g_Settings.notificationWidth              = j["notificationWidth"].get<float>();
+        if (j.contains("notificationHeight"))             g_Settings.notificationHeight             = j["notificationHeight"].get<float>();
+        if (j.contains("notificationDuration"))           g_Settings.notificationDuration           = j["notificationDuration"].get<float>();
+        if (j.contains("notificationEnableMinValue"))     g_Settings.notificationEnableMinValue     = j["notificationEnableMinValue"].get<bool>();
+        if (j.contains("notificationMinValueGold"))       g_Settings.notificationMinValueGold       = j["notificationMinValueGold"].get<float>();
+        if (j.contains("notificationEnableMinRarity"))    g_Settings.notificationEnableMinRarity    = j["notificationEnableMinRarity"].get<bool>();
+        if (j.contains("notificationMinRarity"))          g_Settings.notificationMinRarity          = j["notificationMinRarity"].get<int>();
+        if (j.contains("notificationCombineValueAndRarity")) g_Settings.notificationCombineValueAndRarity = j["notificationCombineValueAndRarity"].get<bool>();
+        if (j.contains("notificationIncludeNonProfit"))   g_Settings.notificationIncludeNonProfit   = j["notificationIncludeNonProfit"].get<bool>();
+        if (j.contains("notificationPrecursorAlert"))     g_Settings.notificationPrecursorAlert     = j["notificationPrecursorAlert"].get<bool>();
+        if (j.contains("notificationInfusionAlert"))      g_Settings.notificationInfusionAlert      = j["notificationInfusionAlert"].get<bool>();
+        if (j.contains("notificationIncludeAgonyInfusions")) g_Settings.notificationIncludeAgonyInfusions = j["notificationIncludeAgonyInfusions"].get<bool>();
+        if (j.contains("notificationStacking"))           g_Settings.notificationStacking           = j["notificationStacking"].get<bool>();
+
+        // Audio Settings
+        if (j.contains("notificationPlaySound"))       g_Settings.notificationPlaySound       = j["notificationPlaySound"].get<bool>();
+        if (j.contains("notificationVolume"))          g_Settings.notificationVolume          = j["notificationVolume"].get<float>();
+        if (j.contains("notificationVolumeStandard"))  g_Settings.notificationVolumeStandard  = j["notificationVolumeStandard"].get<float>();
+        if (j.contains("notificationVolumePrecursor")) g_Settings.notificationVolumePrecursor = j["notificationVolumePrecursor"].get<float>();
+        if (j.contains("notificationVolumeInfusion"))  g_Settings.notificationVolumeInfusion  = j["notificationVolumeInfusion"].get<float>();
+        if (j.contains("notificationVolumeAlert"))     g_Settings.notificationVolumeAlert     = j["notificationVolumeAlert"].get<float>();
+        if (j.contains("soundPathStandard"))           g_Settings.soundPathStandard           = j["soundPathStandard"].get<std::string>();
+        if (j.contains("soundPathPrecursor"))          g_Settings.soundPathPrecursor          = j["soundPathPrecursor"].get<std::string>();
+        if (j.contains("soundPathInfusion"))           g_Settings.soundPathInfusion           = j["soundPathInfusion"].get<std::string>();
+        if (j.contains("soundPathAlert"))              g_Settings.soundPathAlert              = j["soundPathAlert"].get<std::string>();
+
+        // Notification Triggers
+        if (j.contains("notifyProfitGoal"))       g_Settings.notifyProfitGoal       = j["notifyProfitGoal"].get<bool>();
+        if (j.contains("profitGoalAmount"))       g_Settings.profitGoalAmount       = j["profitGoalAmount"].get<int>();
+        if (j.contains("notifyResetWarning"))     g_Settings.notifyResetWarning     = j["notifyResetWarning"].get<bool>();
+        if (j.contains("resetWarningMinutes"))    g_Settings.resetWarningMinutes    = j["resetWarningMinutes"].get<int>();
+        if (j.contains("notifySessionComplete")) g_Settings.notifySessionComplete  = j["notifySessionComplete"].get<bool>();
+        if (j.contains("sessionCompleteHours"))  g_Settings.sessionCompleteHours   = j["sessionCompleteHours"].get<int>();
 
         EnsureMainTabOrderValid();
         ClampSettings();
@@ -1479,10 +1642,14 @@ void SettingsManager::ResetToDefaults()
     g_Settings.toggleHotkey = "CTRL+F";
     g_Settings.miniWindowToggleHotkey = "CTRL+SHIFT+M";
     g_Settings.nextResetDateTimeUtc.clear();
-    g_Settings.iconSize = 32;
-    g_Settings.gridIconSize = 32;
+    g_Settings.iconSize = 36;
     g_Settings.showRarityBorder = true;
+    g_Settings.rarityBorderSize = 3.0f;
     g_Settings.enableGradientBackgrounds = false;
+    g_Settings.showProfitSparkline = true;
+    g_Settings.enableSummariesInProfitTab = true;
+    g_Settings.enableBestDropHighlight = true;
+    g_Settings.enableBestDropInMiniWindow = false;
     g_Settings.gradientTopColor[0] = 0.95f; g_Settings.gradientTopColor[1] = 0.95f; g_Settings.gradientTopColor[2] = 1.0f; g_Settings.gradientTopColor[3] = 1.0f;
     g_Settings.gradientBottomColor[0] = 0.85f; g_Settings.gradientBottomColor[1] = 0.85f; g_Settings.gradientBottomColor[2] = 0.95f; g_Settings.gradientBottomColor[3] = 1.0f;
     g_Settings.showMiniWindow = false;
@@ -1495,8 +1662,8 @@ void SettingsManager::ResetToDefaults()
     g_Settings.miniWindowClickThrough = false;
     g_Settings.miniWindowPosX = 50.0f;
     g_Settings.miniWindowPosY = 50.0f;
-    g_Settings.miniWindowWidth = 200.0f;
-    g_Settings.miniWindowHeight = 150.0f;
+    g_Settings.miniWindowWidth = 350.0f;
+    g_Settings.miniWindowHeight = 200.0f;
     g_Settings.mainWindowClickThrough = false;
     g_Settings.mainWindowPosX = 100.0f;
     g_Settings.mainWindowPosY = 100.0f;
@@ -1504,6 +1671,22 @@ void SettingsManager::ResetToDefaults()
     g_Settings.mainWindowHeight = 600.0f;
     g_Settings.activeTab = 0;
     g_Settings.mainTabOrder = DefaultMainTabOrder();
+    g_Settings.lockTabOrder = false;
+    g_Settings.enableTimelineTab = true;
+    g_Settings.groupByRarity = false;
+    g_Settings.showRarityAsTabs = false;
+    g_Settings.groupByType = false;
+    g_Settings.showTypeAsTabs = false;
+    g_Settings.currencyGroupByCategory = false;
+    g_Settings.currencyShowAsTabs = false;
+    g_Settings.mainWindowOpacity = 1.0f;
+    g_Settings.miniWindowOpacity = 1.0f;
+    g_Settings.accentColorR = 0.365f;
+    g_Settings.accentColorG = 0.259f;
+    g_Settings.accentColorB = 0.2f;
+    g_Settings.enableSessionHistory = false;
+    g_Settings.maxSessionHistory = 20;
+    g_Settings.overwriteSessionHistory = true;
     g_Settings.itemSortMode = 0;
     g_Settings.itemRarityFilterMin = 0;
     g_Settings.showItemIcons = true;
@@ -1598,6 +1781,9 @@ void SettingsManager::ResetToDefaults()
     g_Settings.enableIgnoredItems = false;
     g_Settings.enableIconCache = true;
     g_Settings.iconCacheMaxIcons = 500;
+    g_Settings.maxHistoryItems = 500;
+    g_Settings.priceUpdateIntervalMin = 5;
+    g_Settings.disableComplexVisualsOnLowPerf = false;
     g_Settings.countTextColor = 0xFFFFFF;
     g_Settings.countBackgroundColor = 0x000000;
     g_Settings.countFontSize = 20;
@@ -1628,8 +1814,42 @@ void SettingsManager::ResetToDefaults()
     g_Settings.enableDebugTab = false;
     g_Settings.useFakeDrfServer = false;
     g_Settings.enableNotifications = false;
+    g_Settings.showNotificationSetup = false;
+    g_Settings.notificationPosX = 1600.0f;
+    g_Settings.notificationPosY = 800.0f;
+    g_Settings.notificationWidth = 300.0f;
+    g_Settings.notificationHeight = 0.0f;
+    g_Settings.notificationDuration = 5.0f;
+    g_Settings.notificationEnableMinValue = true;
+    g_Settings.notificationMinValueGold = 1.0f;
+    g_Settings.notificationEnableMinRarity = true;
+    g_Settings.notificationMinRarity = 5;
+    g_Settings.notificationCombineValueAndRarity = false;
+    g_Settings.notificationIncludeNonProfit = false;
+    g_Settings.notificationPrecursorAlert = true;
+    g_Settings.notificationInfusionAlert = true;
+    g_Settings.notificationIncludeAgonyInfusions = false;
+    g_Settings.notificationStacking = true;
     g_Settings.notificationPlaySound = false;
+    g_Settings.notificationVolume = 0.5f;
+    g_Settings.notificationVolumeStandard = 0.5f;
+    g_Settings.notificationVolumePrecursor = 0.5f;
+    g_Settings.notificationVolumeInfusion = 0.5f;
+    g_Settings.notificationVolumeAlert = 0.5f;
+    g_Settings.soundPathStandard.clear();
+    g_Settings.soundPathPrecursor.clear();
+    g_Settings.soundPathInfusion.clear();
+    g_Settings.soundPathAlert.clear();
+    g_Settings.notifyProfitGoal = false;
+    g_Settings.profitGoalAmount = 1000000;
     g_Settings.notifyResetWarning = false;
+    g_Settings.resetWarningMinutes = 5;
+    g_Settings.notifySessionComplete = false;
+    g_Settings.sessionCompleteHours = 4;
+    g_Settings.enableAutoBackups = true;
+    g_Settings.maxBackupCount = 5;
+    g_Settings.backupFrequency = 1;
+    g_Settings.currentProfileIndex = -1;
     g_Settings.gw2ApiConnectTimeout = 15000;
     g_Settings.gw2ApiReceiveTimeout = 30000;
     g_Settings.salvageKitSettings.clear();
@@ -1674,6 +1894,7 @@ void SettingsManager::CreateProfile(const std::string& name)
     j["miniWindowShowTotalItems"] = g_Settings.miniWindowShowTotalItems;
     j["miniWindowShowSessionDuration"] = g_Settings.miniWindowShowSessionDuration;
     j["miniWindowClickThrough"] = g_Settings.miniWindowClickThrough;
+    j["miniWindowHideTitleBar"] = g_Settings.miniWindowHideTitleBar;
     j["mainWindowClickThrough"] = g_Settings.mainWindowClickThrough;
     j["enableCustomProfit"] = g_Settings.enableCustomProfit;
     j["enableSearch"] = g_Settings.enableSearch;
@@ -1685,6 +1906,7 @@ void SettingsManager::CreateProfile(const std::string& name)
     j["enableCurrenciesTab"] = g_Settings.enableCurrenciesTab;
     j["enableFilterTab"] = g_Settings.enableFilterTab;
     j["enableSessionHistoryTab"] = g_Settings.enableSessionHistoryTab;
+    j["enableTimelineTab"] = g_Settings.enableTimelineTab;
     j["mainTabOrder"] = g_Settings.mainTabOrder;
     j["favoritesFirst"] = g_Settings.favoritesFirst;
     j["enableFavoriteTextColor"] = g_Settings.enableFavoriteTextColor;
@@ -1755,6 +1977,7 @@ void SettingsManager::ApplyProfile(int index)
         if (j.contains("miniWindowShowTotalItems")) g_Settings.miniWindowShowTotalItems = j["miniWindowShowTotalItems"].get<bool>();
         if (j.contains("miniWindowShowSessionDuration")) g_Settings.miniWindowShowSessionDuration = j["miniWindowShowSessionDuration"].get<bool>();
         if (j.contains("miniWindowClickThrough")) g_Settings.miniWindowClickThrough = j["miniWindowClickThrough"].get<bool>();
+        if (j.contains("miniWindowHideTitleBar")) g_Settings.miniWindowHideTitleBar = j["miniWindowHideTitleBar"].get<bool>();
         if (j.contains("mainWindowClickThrough")) g_Settings.mainWindowClickThrough = j["mainWindowClickThrough"].get<bool>();
         if (j.contains("enableCustomProfit")) g_Settings.enableCustomProfit = j["enableCustomProfit"].get<bool>();
         if (j.contains("enableSearch")) g_Settings.enableSearch = j["enableSearch"].get<bool>();
@@ -1858,6 +2081,7 @@ void SettingsManager::UpdateProfile(int index)
     j["miniWindowShowTotalItems"] = g_Settings.miniWindowShowTotalItems;
     j["miniWindowShowSessionDuration"] = g_Settings.miniWindowShowSessionDuration;
     j["miniWindowClickThrough"] = g_Settings.miniWindowClickThrough;
+    j["miniWindowHideTitleBar"] = g_Settings.miniWindowHideTitleBar;
     j["mainWindowClickThrough"] = g_Settings.mainWindowClickThrough;
     j["enableCustomProfit"] = g_Settings.enableCustomProfit;
     j["enableSearch"] = g_Settings.enableSearch;

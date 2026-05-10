@@ -82,8 +82,8 @@ void RenderCurrenciesTab()
     {
         // Grid View for Currencies
         float cellSize = static_cast<float>(g_Settings.gridIconSizeCurrencies) + 10.0f; // icon + padding
-        ImVec2 windowSize = ImGui::GetWindowSize();
-        int columns = std::clamp(static_cast<int>(windowSize.x / cellSize), 2, 50);
+        float availWidth = ImGui::GetContentRegionAvail().x;
+        int columns = std::clamp(static_cast<int>((availWidth - 15.0f) / cellSize), 2, 50);
 
         if (ImGui::BeginChild("##CurrenciesGrid", ImVec2(0, 0), true))
         {
@@ -143,17 +143,20 @@ void RenderCurrenciesTab()
                                             ImGui::EndTooltip();
                                         }
                                         ImVec2 iconSize = ImVec2(static_cast<float>(g_Settings.gridIconSizeCurrencies), static_cast<float>(g_Settings.gridIconSizeCurrencies));
-                                        float offsetX = iconSize.x * 0.15f;
-                                        float offsetY = iconSize.y * 0.15f;
-                                        ImVec2 countPos = ImVec2(cursor.x + iconSize.x - ImGui::CalcTextSize("999").x - offsetX, cursor.y + iconSize.y - ImGui::CalcTextSize("999").y - offsetY);
-                                        ImGui::SetCursorPos(countPos);
-                                        ImVec4 countColor = st.count > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.count < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
-                                        float fontSize = static_cast<float>(g_Settings.gridIconSizeCurrencies) * 0.4f;
+                                        char countStr[32]; snprintf(countStr, sizeof(countStr), "%lld", st.count);
+                                        
+                                        float fontSize = static_cast<float>(g_Settings.gridIconSizeCurrencies) * 0.45f; // Increased from 0.4f
                                         ImGui::PushFont(ImGui::GetFont());
                                         ImGui::SetWindowFontScale(fontSize / ImGui::GetFontSize());
-                                        char countStr[32]; snprintf(countStr, sizeof(countStr), "%lld", st.count);
-                                        ImVec2 shadowOffsets[] = { {-1, -1}, {1, -1}, {-1, 1}, {1, 1} };
-                                        for (int s = 0; s < 4; s++) { ImGui::SetCursorPos(ImVec2(countPos.x + shadowOffsets[s].x, countPos.y + shadowOffsets[s].y)); ImGui::TextColored(ImVec4(0, 0, 0, 1), "%s", countStr); }
+                                        
+                                        ImVec2 textSize = ImGui::CalcTextSize(countStr);
+                                        ImVec2 countPos = ImVec2(cursor.x + iconSize.x - textSize.x - 2.0f, cursor.y + iconSize.y - textSize.y - 2.0f);
+                                        
+                                        ImVec4 countColor = st.count > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.count < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
+                                        
+                                        // Draw shadow/outline for better readability
+                                        ImVec2 shadowOffsets[] = { {-1, -1}, {1, -1}, {-1, 1}, {1, 1}, {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
+                                        for (int s = 0; s < 8; s++) { ImGui::SetCursorPos(ImVec2(countPos.x + shadowOffsets[s].x, countPos.y + shadowOffsets[s].y)); ImGui::TextColored(ImVec4(0, 0, 0, 1), "%s", countStr); }
                                         ImGui::SetCursorPos(countPos); ImGui::TextColored(countColor, "%s", countStr);
                                         ImGui::SetWindowFontScale(1.0f); ImGui::PopFont();
                                     }

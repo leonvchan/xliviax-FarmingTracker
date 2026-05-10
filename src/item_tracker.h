@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <set>
 #include <string>
 #include <mutex>
 #include <chrono>
@@ -31,6 +32,7 @@ struct ApiDetails
     std::string rarity;
     bool        loaded       = false;
     ItemType    itemType     = ItemType::Unknown;
+    std::string upgradeComponentType; // e.g., "Infusion", "Rune", "Sigil", etc.
     bool        knownByApi   = false;
 };
 
@@ -100,13 +102,15 @@ namespace ItemTracker
     
     // Favorites System
     void SetFavorite(int apiId, bool favorite);
+    std::map<int, Stat> GetFavoriteItems();
+    std::map<int, Stat> GetFavoriteCurrencies();
 
     // Timeline / Drops history
     std::vector<SessionHistory::DropEntry> GetSessionDropsCopy();
 
     bool IsFavorite(int apiId);
-    std::map<int, Stat> GetFavoriteItems();
-    std::map<int, Stat> GetFavoriteCurrencies();
+    std::set<int> GetFavoriteItemIds();
+    std::set<int> GetFavoriteCurrencyIds();
 
     // Categories
     std::string GetCurrencyCategory(int currencyId);

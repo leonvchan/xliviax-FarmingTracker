@@ -4,6 +4,7 @@
 #include "settings.h"
 #include "localization.h"
 #include "ui_common.h"
+#include "ui_context_menu.h"
 #include <algorithm>
 #include <ctime>
 #include <map>
@@ -68,7 +69,22 @@ namespace UITimeline
         ImGui::Spacing();
 
         // 2. Timeline List (Grouped by Timestamp)
-        auto drops = ItemTracker::GetSessionDropsCopy();
+        auto allDrops = ItemTracker::GetSessionDropsCopy();
+        std::vector<SessionHistory::DropEntry> drops;
+        
+        // Filter out ignored items/currencies
+        for (const auto& drop : allDrops)
+        {
+            if (drop.isCurrency)
+            {
+                if (ItemTracker::IsCurrencyIgnored(drop.itemId)) continue;
+            }
+            else
+            {
+                if (ItemTracker::IsItemIgnored(drop.itemId)) continue;
+            }
+            drops.push_back(drop);
+        }
         
         // Group drops by timestamp
         std::map<std::string, std::vector<SessionHistory::DropEntry>> groupedDrops;
@@ -109,16 +125,18 @@ namespace UITimeline
                     }
 
                     // 1. Time Header
-                    ImGui::TextColored(ImVec4(0.4f, 0.6f, 1.0f, 1.0f), "X Livia X"); // Placeholder Name
+                    // Use character name from the first drop in this group
+                    std::string characterName = group.empty() ? "" : group[0].characterName;
+                    ImGui::TextColored(ImVec4(0.4f, 0.6f, 1.0f, 1.0f), characterName.empty() ? UICommon::s_AccountNameBuf : characterName.c_str());
                     ImGui::SameLine();
-                    ImGui::TextDisabled("%s", ts.c_str());
+                    ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "%s", ts.c_str());
 
                     // 2. Item Drops Label + MF
                     ImGui::Text("%s", Localization::GetText("timeline_item_drops"));
                     if (groupMF >= 0)
                     {
                         ImGui::SameLine();
-                        ImGui::TextDisabled("MF: %d%%", groupMF);
+                        ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "MF: %d%%", groupMF);
                     }
 
                     // 3. Gold Value and Currencies in one row below "Item Drops"
@@ -131,33 +149,62 @@ namespace UITimeline
                     if (hasCurrencies)
                     {
                         ImGui::SameLine();
-                        ImGui::TextDisabled("|");
+                        ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "|");
                         ImGui::SameLine();
-                        ImGui::TextDisabled("%s:", Localization::GetText("timeline_currencies"));
+                        ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "%s:", Localization::GetText("timeline_currencies"));
                         ImGui::SameLine();
+                        
+                        // Group currencies by itemId and sum counts
+                        std::map<int, int> currencyCounts;
+                        std::map<int, std::string> currencyNames;
+                        std::map<int, std::string> currencyIcons;
+                        std::map<int, std::string> currencyRarities;
+                        
                         for (const auto& d : group)
                         {
                             if (!d.isCurrency) continue;
-                            ImGui::Text("%d", d.count);
+                            currencyCounts[d.itemId] += d.count;
+                            if (currencyNames.find(d.itemId) == currencyNames.end())
+                            {
+                                currencyNames[d.itemId] = d.itemName;
+                                auto st = ItemTracker::GetCurrencyStat(d.itemId);
+                                currencyIcons[d.itemId] = st.details.iconUrl;
+                                currencyRarities[d.itemId] = st.details.rarity;
+                            }
+                        }
+                        
+                        // Display summed currencies
+                        for (const auto& [itemId, count] : currencyCounts)
+                        {
+                            ImGui::PushID(itemId);
+                            ImGui::Text("%d", count);
                             ImGui::SameLine();
                             
-                            // Get currency details for icon
-                            auto st = ItemTracker::GetCurrencyStat(d.itemId);
-                            UICommon::DrawItemIconCell(d.itemId, st.details.iconUrl, 16.0f, st.details.rarity);
+                            UICommon::DrawItemIconCell(itemId, currencyIcons[itemId], static_cast<float>(g_Settings.timelineIconSizeCurrencies), currencyRarities[itemId]);
                             
                             if (ImGui::IsItemHovered())
-                                ImGui::SetTooltip("%s (x%d)", d.itemName.c_str(), d.count);
+                                ImGui::SetTooltip("%s (x%d)", currencyNames[itemId].c_str(), count);
+                            
+                            // Right-click context menu for currencies
+                            if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+                            {
+                                UIContextMenu::OpenContextMenu("TimelineCurrencyContextMenu", itemId, currencyNames[itemId]);
+                            }
+                            UIContextMenu::RenderCurrencyContextMenu("TimelineCurrencyContextMenu", UIContextMenu::ContextMenuType::General);
+                            
                             ImGui::SameLine();
+                            ImGui::PopID();
                         }
                     }
 
                     // 4. Icons Row
                     ImGui::Spacing();
-                    float iconSize = 40.0f;
+                    float iconSize = static_cast<float>(g_Settings.timelineIconSizeItems);
                     for (const auto& d : group)
                     {
                         if (d.isCurrency) continue;
 
+                        ImGui::PushID(d.itemId);
                         ImGui::BeginGroup();
                         UICommon::DrawItemIconCell(d.itemId, d.iconUrl, iconSize, d.rarity);
                         
@@ -171,11 +218,12 @@ namespace UITimeline
                         
                         // Count position similar to grid view
                         ImVec2 textSize = ImGui::CalcTextSize(countStr);
-                        ImVec2 countPos = ImVec2(pos.x + iconSize - textSize.x - iconSize * 0.1f, 
-                                                 pos.y + iconSize - textSize.y - iconSize * 0.1f);
+                        ImVec2 countPos = ImVec2(pos.x + iconSize - textSize.x - 2.0f, 
+                                                 pos.y + iconSize - textSize.y - 2.0f);
 
-                        ImVec2 shadowOffsets[] = { {-1, -1}, {1, -1}, {-1, 1}, {1, 1} };
-                        for (int s = 0; s < 4; s++) {
+                        // Draw 8-way shadow/outline for better readability
+                        ImVec2 shadowOffsets[] = { {-1, -1}, {1, -1}, {-1, 1}, {1, 1}, {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
+                        for (int s = 0; s < 8; s++) {
                             ImGui::GetWindowDrawList()->AddText(ImVec2(countPos.x + shadowOffsets[s].x, countPos.y + shadowOffsets[s].y), 
                                 IM_COL32(0, 0, 0, 255), countStr);
                         }
@@ -186,8 +234,16 @@ namespace UITimeline
                         if (ImGui::IsItemHovered())
                             ImGui::SetTooltip("%s (x%d)\nValue: %s", d.itemName.c_str(), d.count, UICommon::FormatCoin(d.totalValue).c_str());
                         
+                        // Right-click context menu for items
+                        if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+                        {
+                            UIContextMenu::OpenContextMenu("TimelineItemContextMenu", d.itemId, d.itemName);
+                        }
+                        UIContextMenu::RenderItemContextMenu("TimelineItemContextMenu", UIContextMenu::ContextMenuType::General);
+                        
                         ImGui::EndGroup();
                         ImGui::SameLine();
+                        ImGui::PopID();
                     }
                     ImGui::NewLine();
 

@@ -22,6 +22,7 @@ std::string CreateFullBackup()
     settingsJson["showMiniWindow"] = g_Settings.showMiniWindow;
     settingsJson["mainWindowClickThrough"] = g_Settings.mainWindowClickThrough;
     settingsJson["miniWindowClickThrough"] = g_Settings.miniWindowClickThrough;
+    settingsJson["miniWindowHideTitleBar"] = g_Settings.miniWindowHideTitleBar;
     settingsJson["mainWindowOpacity"] = g_Settings.mainWindowOpacity;
     settingsJson["miniWindowOpacity"] = g_Settings.miniWindowOpacity;
     settingsJson["accentColorR"] = g_Settings.accentColorR;
@@ -152,6 +153,7 @@ bool RestoreFromBackup(const std::string& jsonData)
             g_Settings.showMiniWindow = settingsJson.value("showMiniWindow", true);
             g_Settings.mainWindowClickThrough = settingsJson.value("mainWindowClickThrough", false);
             g_Settings.miniWindowClickThrough = settingsJson.value("miniWindowClickThrough", false);
+            g_Settings.miniWindowHideTitleBar = settingsJson.value("miniWindowHideTitleBar", false);
             g_Settings.mainWindowOpacity = settingsJson.value("mainWindowOpacity", 1.0f);
             g_Settings.miniWindowOpacity = settingsJson.value("miniWindowOpacity", 1.0f);
             g_Settings.accentColorR = settingsJson.value("accentColorR", 0.5f);

@@ -131,8 +131,13 @@ void RenderItemsTab()
     {
         // Grid View
         float cellSize = static_cast<float>(g_Settings.gridIconSize) + 10.0f; // icon + padding
-        ImVec2 windowSize = ImGui::GetWindowSize();
-        int columns = std::clamp(static_cast<int>(windowSize.x / cellSize), 2, 50);
+        float availWidth = ImGui::GetContentRegionAvail().x;
+        int columns = std::clamp(static_cast<int>(availWidth / cellSize), 2, 50);
+        
+        // Adjust cellSize if columns are calculated, to fill the space better if needed
+        // but keeping it simple for now to avoid side effects.
+        // Subtracting a bit more for the scrollbar if it might appear
+        if (availWidth > 20.0f) columns = std::clamp(static_cast<int>((availWidth - 15.0f) / cellSize), 2, 50);
 
         // Group by Rarity options
         if (ImGui::Checkbox(Localization::GetText("group_by_rarity"), &g_Settings.groupByRarity))
@@ -271,16 +276,21 @@ void RenderItemsTab()
                                             ImGui::EndTooltip();
                                         }
                                         ImVec2 iconSize = ImVec2(static_cast<float>(g_Settings.gridIconSize), static_cast<float>(g_Settings.gridIconSize));
-                                        ImVec2 countPos = ImVec2(cursor.x + iconSize.x - ImGui::CalcTextSize("999").x - iconSize.x*0.15f, cursor.y + iconSize.y - ImGui::CalcTextSize("999").y - iconSize.y*0.15f);
-                                        ImGui::SetCursorPos(countPos);
-                                        ImVec4 countColor = st.count > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.count < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
-                                        float fontSize = static_cast<float>(g_Settings.gridIconSize) * 0.4f;
-                                        ImGui::PushFont(ImGui::GetFont());
-                                        ImGui::SetWindowFontScale(fontSize / ImGui::GetFontSize());
                                         char countStr[32];
                                         snprintf(countStr, sizeof(countStr), "%lld", st.count);
-                                        ImVec2 shadowOffsets[] = { {-1, -1}, {1, -1}, {-1, 1}, {1, 1} };
-                                        for (int s = 0; s < 4; s++) {
+                                        
+                                        float fontSize = static_cast<float>(g_Settings.gridIconSize) * 0.45f; // Increased from 0.4f
+                                        ImGui::PushFont(ImGui::GetFont());
+                                        ImGui::SetWindowFontScale(fontSize / ImGui::GetFontSize());
+                                        
+                                        ImVec2 textSize = ImGui::CalcTextSize(countStr);
+                                        ImVec2 countPos = ImVec2(cursor.x + iconSize.x - textSize.x - 2.0f, cursor.y + iconSize.y - textSize.y - 2.0f);
+                                        
+                                        ImVec4 countColor = st.count > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.count < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
+                                        
+                                        // Draw shadow/outline for better readability
+                                        ImVec2 shadowOffsets[] = { {-1, -1}, {1, -1}, {-1, 1}, {1, 1}, {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
+                                        for (int s = 0; s < 8; s++) {
                                             ImGui::SetCursorPos(ImVec2(countPos.x + shadowOffsets[s].x, countPos.y + shadowOffsets[s].y));
                                             ImGui::TextColored(ImVec4(0, 0, 0, 1), "%s", countStr);
                                         }
@@ -767,6 +777,55 @@ void RenderItemsTab()
                     UICommon::AlignTableCellIcon(rowH, static_cast<float>(g_Settings.iconSize));
                     UICommon::DrawItemIconCell(id, st.details.iconUrl, static_cast<float>(g_Settings.iconSize), st.details.loaded ? st.details.rarity : "");
 
+                    // Helper lambda for rendering the same tooltip
+                    auto renderItemTooltip = [&]() {
+                        if (st.details.loaded)
+                        {
+                            ImGui::BeginTooltip();
+                            ImGui::Text("%s", st.details.name.c_str());
+                            ImGui::Separator();
+                            char rarityLabel[256];
+                            snprintf(rarityLabel, sizeof(rarityLabel), Localization::GetText("rarity_label"), st.details.rarity.c_str());
+                            ImGui::Text("%s", rarityLabel);
+                            char typeLabel[256];
+                            snprintf(typeLabel, sizeof(typeLabel), Localization::GetText("type_label"), static_cast<int>(st.details.itemType));
+                            ImGui::Text("%s", typeLabel);
+                            // Only show vendor value if the item is actually sellable to vendor
+                            if (ItemTracker::CanSellToVendor(st.details))
+                            {
+                                ImVec4 vendorColor = ImVec4(1.f, 0.84f, 0.f, 1.f);
+                                ImGui::TextColored(vendorColor, Localization::GetText("vendor_value_format"), UICommon::FormatCoin(st.details.vendorValue).c_str());
+                            }
+                            ImVec4 tpSellGrossColor = st.details.tpSellPrice > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.details.tpSellPrice < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
+                            ImGui::TextColored(tpSellGrossColor, Localization::GetText("tp_sell_gross_format"), UICommon::FormatCoin(st.details.tpSellPrice).c_str());
+                            long long tpSellNet = static_cast<long long>(st.details.tpSellPrice * 85.0 / 100.0);
+                            ImVec4 tpSellNetColor = tpSellNet > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (tpSellNet < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
+                            ImGui::TextColored(tpSellNetColor, Localization::GetText("tp_sell_net_format"), UICommon::FormatCoin(tpSellNet).c_str());
+                            ImVec4 tpBuyGrossColor = st.details.tpBuyPrice > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.details.tpBuyPrice < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
+                            ImGui::TextColored(tpBuyGrossColor, Localization::GetText("tp_buy_gross_format"), UICommon::FormatCoin(st.details.tpBuyPrice).c_str());
+                            long long tpBuyNet = static_cast<long long>(st.details.tpBuyPrice * 85.0 / 100.0);
+                            ImVec4 tpBuyNetColor = tpBuyNet > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (tpBuyNet < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
+                            ImGui::TextColored(tpBuyNetColor, Localization::GetText("tp_buy_net_format"), UICommon::FormatCoin(tpBuyNet).c_str());
+                            char accountBoundLabel[256];
+                            snprintf(accountBoundLabel, sizeof(accountBoundLabel), Localization::GetText("account_bound_label"), st.details.accountBound ? Localization::GetText("yes_label") : Localization::GetText("no_label"));
+                            ImGui::Text("%s", accountBoundLabel);
+                            char noSellLabel[256];
+                            snprintf(noSellLabel, sizeof(noSellLabel), Localization::GetText("nosell_label"), st.details.noSell ? Localization::GetText("yes_label") : Localization::GetText("no_label"));
+                            ImGui::Text("%s", noSellLabel);
+                            ImGui::Separator();
+                            char itemIdLabel[256];
+                            snprintf(itemIdLabel, sizeof(itemIdLabel), Localization::GetText("item_id_label"), id);
+                            ImGui::Text("%s", itemIdLabel);
+                            ImGui::EndTooltip();
+                        }
+                    };
+
+                    // Show tooltip on icon
+                    if (ImGui::IsItemHovered())
+                    {
+                        renderItemTooltip();
+                    }
+
                     // Right-click context menu
                     if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
                     {
@@ -803,42 +862,9 @@ void RenderItemsTab()
                         col = ImVec4(g_Settings.favoriteTextColor[0], g_Settings.favoriteTextColor[1], g_Settings.favoriteTextColor[2], g_Settings.favoriteTextColor[3]);
 
                     UICommon::TextWithTooltip(name.c_str(), 200.0f, col);
-                    if (ImGui::IsItemHovered() && st.details.loaded)
+                    if (ImGui::IsItemHovered())
                     {
-                        ImGui::BeginTooltip();
-                        char rarityLabel[256];
-                        snprintf(rarityLabel, sizeof(rarityLabel), Localization::GetText("rarity_label"), st.details.rarity.c_str());
-                        ImGui::Text("%s", rarityLabel);
-                        char typeLabel[256];
-                        snprintf(typeLabel, sizeof(typeLabel), Localization::GetText("type_label"), static_cast<int>(st.details.itemType));
-                        ImGui::Text("%s", typeLabel);
-                        // Only show vendor value if the item is actually sellable to vendor
-                        if (!st.details.noSell && st.details.vendorValue > 0)
-                        {
-                            ImVec4 vendorColor = st.details.vendorValue > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.details.vendorValue < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
-                            ImGui::TextColored(vendorColor, Localization::GetText("vendor_value_format"), UICommon::FormatCoin(st.details.vendorValue).c_str());
-                        }
-                        ImVec4 tpSellGrossColor = st.details.tpSellPrice > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.details.tpSellPrice < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
-                        ImGui::TextColored(tpSellGrossColor, Localization::GetText("tp_sell_gross_format"), UICommon::FormatCoin(st.details.tpSellPrice).c_str());
-                        long long tpSellNet = static_cast<long long>(st.details.tpSellPrice * 85.0 / 100.0);
-                        ImVec4 tpSellNetColor = tpSellNet > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (tpSellNet < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
-                        ImGui::TextColored(tpSellNetColor, Localization::GetText("tp_sell_net_format"), UICommon::FormatCoin(tpSellNet).c_str());
-                        ImVec4 tpBuyGrossColor = st.details.tpBuyPrice > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.details.tpBuyPrice < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
-                        ImGui::TextColored(tpBuyGrossColor, Localization::GetText("tp_buy_gross_format"), UICommon::FormatCoin(st.details.tpBuyPrice).c_str());
-                        long long tpBuyNet = static_cast<long long>(st.details.tpBuyPrice * 85.0 / 100.0);
-                        ImVec4 tpBuyNetColor = tpBuyNet > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (tpBuyNet < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
-                        ImGui::TextColored(tpBuyNetColor, Localization::GetText("tp_buy_net_format"), UICommon::FormatCoin(tpBuyNet).c_str());
-                        char accountBoundLabel[256];
-                        snprintf(accountBoundLabel, sizeof(accountBoundLabel), Localization::GetText("account_bound_label"), st.details.accountBound ? Localization::GetText("yes_label") : Localization::GetText("no_label"));
-                        ImGui::Text("%s", accountBoundLabel);
-                        char noSellLabel[256];
-                        snprintf(noSellLabel, sizeof(noSellLabel), Localization::GetText("nosell_label"), st.details.noSell ? Localization::GetText("yes_label") : Localization::GetText("no_label"));
-                        ImGui::Text("%s", noSellLabel);
-                        ImGui::Separator();
-                        char itemIdLabel[256];
-                        snprintf(itemIdLabel, sizeof(itemIdLabel), Localization::GetText("item_id_label"), id);
-                        ImGui::Text("%s", itemIdLabel);
-                        ImGui::EndTooltip();
+                        renderItemTooltip();
                     }
 
                     // Right-click context menu for name

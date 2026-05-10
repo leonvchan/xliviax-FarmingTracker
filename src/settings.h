@@ -74,6 +74,8 @@ struct Settings
     bool miniWindowShowTotalItems = false;
     bool miniWindowShowSessionDuration = false;
     bool miniWindowClickThrough = false;
+    bool miniWindowHideTitleBar = false;
+    bool miniWindowLocked = false;
     float miniWindowPosX = 50.0f;
     float miniWindowPosY = 50.0f;
     float miniWindowWidth = 350.0f;
@@ -129,7 +131,6 @@ struct Settings
 
     // Session History
     bool enableSessionHistory = false;
-    bool enableSessionTimeline = true;
     int maxSessionHistory = 20;  // 1 to 50
     bool overwriteSessionHistory = true;  // If true, oldest session is deleted when limit is reached
 
@@ -277,6 +278,7 @@ struct Settings
     bool notificationEnableMinRarity = true;
     int notificationMinRarity = 5; // Exotic+
     bool notificationCombineValueAndRarity = false;
+    bool notificationIncludeNonProfit = true;
     bool notificationPrecursorAlert = true;
     bool notificationInfusionAlert = true;
     bool notificationIncludeAgonyInfusions = false;
@@ -315,6 +317,10 @@ struct Settings
     bool enableGridViewCurrencies = false;
     int gridIconSize = 48;
     int gridIconSizeCurrencies = 48;
+
+    // Timeline Tab Settings
+    int timelineIconSizeItems = 40;
+    int timelineIconSizeCurrencies = 16;
 
     // UI State Settings
     bool showTopItems = true;

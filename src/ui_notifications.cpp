@@ -386,7 +386,7 @@ namespace UINotifications
                         }
                         else
                         {
-                            ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), "%s", Localization::GetText("rare_drop_label"));
+                            ImGui::TextColored(ImVec4(1.f, 0.6f, 0.0f, 1.f), "%s", Localization::GetText("rare_drop_label"));
                         }
 
                         // Item Name with rarity color

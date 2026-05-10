@@ -16,7 +16,7 @@ A Guild Wars 2 Nexus addon that tracks items and currencies collected during far
 1. Download the latest release from [GitHub](https://github.com/xLiviax-Dev/FarmingTracker)
 2. Place the `.dll` file in your addons folder:
    ```
-   %USERPROFILE%\Documents\Guild Wars 2\addons\
+   Guild Wars 2\addons\FarmingTracker\
    ```
 3. Load the addon through Nexus Addon Manager
 4. Enter your **DRF Token** and **GW2 API Key** in the Farming Tracker settings (Nexus Options Panel)
@@ -137,4 +137,4 @@ This project is licensed under the MIT License — see the [LICENSE] file for de
 
 For issues, feature requests, or questions, please visit the [GitHub repository](https://github.com/xLiviax-Dev/FarmingTracker).
 
-<img width="1689" height="1435" alt="Screenshot 2026-05-06 212214" src="https://github.com/user-attachments/assets/c7bf9d33-82fb-43c8-905d-902d3c38f348" />
+<img width="1403" height="1873" alt="Screenshot 2026-05-09 001740" src="https://github.com/user-attachments/assets/d53a86d1-2899-4f42-a475-59da0ea985a2" />

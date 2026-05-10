@@ -499,13 +499,13 @@ void RenderOptions()
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", Localization::GetText("enable_session_history_tooltip"));
 
-        if (ImGui::Checkbox(Localization::GetText("enable_session_timeline"), &g_Settings.enableSessionTimeline))
+        if (ImGui::Checkbox(Localization::GetText("overwrite_session_history"), &g_Settings.overwriteSessionHistory))
         {
             SettingsManager::Save();
-            SessionHistory::SetSaveAllItems(g_Settings.enableSessionTimeline);
+            SessionHistory::SetOverwrite(g_Settings.overwriteSessionHistory);
         }
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("%s", Localization::GetText("enable_session_timeline_tooltip"));
+            ImGui::SetTooltip("%s", Localization::GetText("overwrite_session_history_tooltip"));
 
         ImGui::Text("%s", Localization::GetText("max_session_history"));
         if (ImGui::SliderInt("##MaxSessionHistory", &g_Settings.maxSessionHistory, 1, 50, "%d"))
@@ -515,15 +515,6 @@ void RenderOptions()
         }
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", Localization::GetText("max_session_history_tooltip"));
-
-        ImGui::Spacing();
-        if (ImGui::Checkbox(Localization::GetText("overwrite_session_history"), &g_Settings.overwriteSessionHistory))
-        {
-            SettingsManager::Save();
-            SessionHistory::SetOverwrite(g_Settings.overwriteSessionHistory);
-        }
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("%s", Localization::GetText("overwrite_session_history_tooltip"));
     }
 
     ImGui::Spacing();
@@ -597,6 +588,19 @@ void RenderOptions()
     // === Other Tabs ===
     if (ImGui::CollapsingHeader(Localization::GetText("tabs_settings")))
     {
+        ImGui::Text("%s", Localization::GetText("tab_settings"));
+        ImGui::TextDisabled("%s", Localization::GetText("tab_settings_description"));
+
+        ImGui::Spacing();
+
+        if (ImGui::Checkbox(Localization::GetText("lock_tab_order"), &g_Settings.lockTabOrder))
+            SettingsManager::Save();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", Localization::GetText("lock_tab_order_tooltip"));
+
+        ImGui::Spacing();
+        ImGui::Separator();
+
         ImGui::Text("%s", Localization::GetText("tabs_description"));
 
         ImGui::Spacing();
@@ -633,10 +637,10 @@ void RenderOptions()
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", Localization::GetText("enable_session_history_tab_tooltip"));
 
-        if (ImGui::Checkbox(Localization::GetText("tab_timeline"), &g_Settings.enableTimelineTab))
+        if (ImGui::Checkbox(Localization::GetText("enable_timeline_tab"), &g_Settings.enableTimelineTab))
             SettingsManager::Save();
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("%s", "Enable or disable the Timeline tab");
+            ImGui::SetTooltip("%s", Localization::GetText("enable_timeline_tab_tooltip"));
 
         if (ImGui::Checkbox(Localization::GetText("enable_filter_tab"), &g_Settings.enableFilterTab))
             SettingsManager::Save();
@@ -647,13 +651,6 @@ void RenderOptions()
             SettingsManager::Save();
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", Localization::GetText("enable_custom_profit_tooltip"));
-
-        if (ImGui::Checkbox(Localization::GetText("lock_tab_order"), &g_Settings.lockTabOrder))
-            SettingsManager::Save();
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("%s", Localization::GetText("lock_tab_order_tooltip"));
-
-        ImGui::Spacing();
     }
 
     ImGui::Spacing();
@@ -689,6 +686,16 @@ void RenderOptions()
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", Localization::GetText("mini_window_click_through_tooltip"));
 
+        if (ImGui::Checkbox(Localization::GetText("mini_window_hide_title_bar"), &g_Settings.miniWindowHideTitleBar))
+            SettingsManager::Save();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", Localization::GetText("mini_window_hide_title_bar_tooltip"));
+
+        if (ImGui::Checkbox(Localization::GetText("mini_window_locked"), &g_Settings.miniWindowLocked))
+            SettingsManager::Save();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", Localization::GetText("mini_window_locked_tooltip"));
+
         ImGui::Text("%s", Localization::GetText("mini_window_widget"));
 
         if (ImGui::Checkbox(Localization::GetText("mini_window_show_profit"), &g_Settings.miniWindowShowProfit))
@@ -716,6 +723,17 @@ void RenderOptions()
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", Localization::GetText("mini_window_show_session_duration_tooltip"));
 
+        ImGui::Spacing();
+
+        // Best Drop in Mini Window
+        if (ImGui::Checkbox(Localization::GetText("enable_best_drop_in_mini_window"), &g_Settings.enableBestDropInMiniWindow))
+            SettingsManager::Save();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", Localization::GetText("enable_best_drop_in_mini_window_tooltip"));
+
+        ImGui::Spacing();
+
+        // Mini Window Transparency
         ImGui::Text("%s", Localization::GetText("mini_window_opacity"));
         float miniOpacityPercent = (1.0f - g_Settings.miniWindowOpacity) * 100.0f;
         if (ImGui::SliderFloat("##MiniWindowOpacity", &miniOpacityPercent, 0.0f, 100.0f, "%.0f%%"))
@@ -725,14 +743,6 @@ void RenderOptions()
         }
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", Localization::GetText("mini_window_opacity_tooltip"));
-
-        ImGui::Spacing();
-
-        // Best Drop in Mini Window
-        if (ImGui::Checkbox(Localization::GetText("enable_best_drop_in_mini_window"), &g_Settings.enableBestDropInMiniWindow))
-            SettingsManager::Save();
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("%s", Localization::GetText("enable_best_drop_in_mini_window_tooltip"));
     }
 
     ImGui::Spacing();
@@ -743,6 +753,23 @@ void RenderOptions()
     {
         // Visual Enhancement Settings
         ImGui::Text("%s", Localization::GetText("visual_enhancements"));
+
+        // Custom Accent Color
+        ImGui::Text("%s:", Localization::GetText("accent_color"));
+        ImGui::SameLine();
+        ImVec4 accentColor(g_Settings.accentColorR, g_Settings.accentColorG, g_Settings.accentColorB, 1.0f);
+        if (ImGui::ColorEdit3("##AccentColor", (float*)&accentColor, ImGuiColorEditFlags_NoInputs))
+        {
+            g_Settings.accentColorR = accentColor.x;
+            g_Settings.accentColorG = accentColor.y;
+            g_Settings.accentColorB = accentColor.z;
+            SettingsManager::Save();
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", Localization::GetText("accent_color_tooltip"));
+
+        ImGui::Spacing();
+
         if (ImGui::Checkbox(Localization::GetText("gradient_backgrounds"), &g_Settings.enableGradientBackgrounds))
             SettingsManager::Save();
         if (ImGui::IsItemHovered())
@@ -810,19 +837,15 @@ void RenderOptions()
         ImGui::Spacing();
         ImGui::Separator();
 
-        // Custom Accent Color
-        ImGui::Text("%s:", Localization::GetText("accent_color"));
-        ImGui::SameLine();
-        ImVec4 accentColor(g_Settings.accentColorR, g_Settings.accentColorG, g_Settings.accentColorB, 1.0f);
-        if (ImGui::ColorEdit3("##AccentColor", (float*)&accentColor, ImGuiColorEditFlags_NoInputs))
-        {
-            g_Settings.accentColorR = accentColor.x;
-            g_Settings.accentColorG = accentColor.y;
-            g_Settings.accentColorB = accentColor.z;
+        // Timeline Tab Icon Sizes
+        if (ImGui::SliderInt(Localization::GetText("timeline_icon_size_items"), &g_Settings.timelineIconSizeItems, 16, 96))
             SettingsManager::Save();
-        }
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("%s", Localization::GetText("accent_color_tooltip"));
+            ImGui::SetTooltip("%s", Localization::GetText("timeline_icon_size_items_tooltip"));
+        if (ImGui::SliderInt(Localization::GetText("timeline_icon_size_currencies"), &g_Settings.timelineIconSizeCurrencies, 16, 48))
+            SettingsManager::Save();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", Localization::GetText("timeline_icon_size_currencies_tooltip"));
     }
 
     ImGui::Spacing();
@@ -1009,6 +1032,11 @@ void RenderOptions()
                     ImGui::PopItemFlag();
                 }
 
+                if (ImGui::Checkbox(Localization::GetText("notification_include_non_profit"), &g_Settings.notificationIncludeNonProfit))
+                    SettingsManager::Save();
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s", Localization::GetText("notification_include_non_profit_tooltip"));
+
                 ImGui::Spacing();
                 ImGui::Separator();
 
@@ -1091,6 +1119,14 @@ void RenderOptions()
     // === Performance Settings ===
     if (ImGui::CollapsingHeader(Localization::GetText("performance_settings")))
     {
+        // Low Perf Mode
+        if (ImGui::Checkbox(Localization::GetText("disable_complex_visuals"), &g_Settings.disableComplexVisualsOnLowPerf))
+            SettingsManager::Save();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", Localization::GetText("disable_complex_visuals_tooltip"));
+
+        ImGui::Spacing();
+
         // Icon Cache
         if (ImGui::Checkbox(Localization::GetText("enable_icon_cache"), &g_Settings.enableIconCache))
             SettingsManager::Save();
@@ -1115,22 +1151,16 @@ void RenderOptions()
         ImGui::Separator();
 
         // History Limit
-        if (ImGui::SliderInt("Max. Items in Liste", &g_Settings.maxHistoryItems, 50, 2000, "%d Items"))
+        if (ImGui::SliderInt(Localization::GetText("max_history_items_limit"), &g_Settings.maxHistoryItems, 50, 2000, "%d Items"))
             SettingsManager::Save();
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Begrenzt die Anzahl der gleichzeitig in der Tabelle angezeigten Items. (0 = unbegrenzt)");
+            ImGui::SetTooltip("%s", Localization::GetText("max_history_items_limit_tooltip"));
 
         // API Update Interval
-        if (ImGui::SliderInt("API Preis-Update (Min)", &g_Settings.priceUpdateIntervalMin, 5, 15, "%d Min"))
+        if (ImGui::SliderInt(Localization::GetText("api_update_interval"), &g_Settings.priceUpdateIntervalMin, 5, 15, "%d Min"))
             SettingsManager::Save();
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Legt fest, wie oft Item-Preise von der GW2-API aktualisiert werden.");
-
-        // Low Perf Mode
-        if (ImGui::Checkbox("Komplexe Effekte deaktivieren", &g_Settings.disableComplexVisualsOnLowPerf))
-            SettingsManager::Save();
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Deaktiviert Gradienten und andere aufwendige UI-Effekte für mehr Performance.");
+            ImGui::SetTooltip("%s", Localization::GetText("api_update_interval_tooltip"));
     }
 
     ImGui::Spacing();

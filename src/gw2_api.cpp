@@ -272,3 +272,24 @@ void Gw2Api::ResetRequestCount()
 {
     s_RequestCount.store(0);
 }
+
+bool Gw2Api::FetchAccountName(const std::string& token, std::string& accountName, std::string& error)
+{
+    accountName.clear();
+    error.clear();
+
+    nlohmann::json accountJson;
+    if (!GetJson("/account", token, accountJson, error))
+    {
+        return false;
+    }
+
+    if (accountJson.contains("name"))
+    {
+        accountName = accountJson["name"].get<std::string>();
+        return true;
+    }
+
+    error = "Account name not found in response";
+    return false;
+}

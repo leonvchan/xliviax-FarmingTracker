@@ -13,7 +13,7 @@ namespace SessionHistory
 static std::string s_addonDir;
 static bool s_enabled = false;
 static int s_maxSessions = 20;
-static bool s_saveAllItems = false;
+static bool s_saveAllItems = true;
 static bool s_overwrite = true;
 
 void Init(const char* addonDir)
