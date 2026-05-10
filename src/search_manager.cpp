@@ -1,5 +1,6 @@
 #include "search_manager.h"
-#include <locale>
+#include <algorithm>
+#include <cctype>
 
 bool SearchManager::MatchesSearch(const std::string& itemName, const std::string& searchTerm)
 {
@@ -14,8 +15,8 @@ bool SearchManager::MatchesSearchCurrency(const std::string& currencyName, const
 std::string SearchManager::ToLowerCase(const std::string& str)
 {
     std::string lowerStr = str;
-    std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), [](char c) {
-        return std::tolower(c, std::locale());
+    std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), [](unsigned char c) {
+        return static_cast<char>(std::tolower(c));
     });
     return lowerStr;
 }

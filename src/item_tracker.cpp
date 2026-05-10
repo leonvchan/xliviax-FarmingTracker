@@ -209,19 +209,16 @@ static void UpdateOrInsert(std::map<int, Stat>& map,
         s.count = delta;
         if (delta > 0) s.notificationPending = true;
 
-        // Re-apply persistent flags
+        // Re-apply persistent flags (Assumes s_PersistentMutex is already locked)
+        if (type == StatType::Item)
         {
-            std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-            if (type == StatType::Item)
-            {
-                s.isFavorite = s_PersistentFavoriteItems.count(apiId) > 0;
-                s.isIgnored = IgnoredItemsManager::IsItemIgnored(apiId);
-            }
-            else
-            {
-                s.isFavorite = s_PersistentFavoriteCurrencies.count(apiId) > 0;
-                s.isIgnored = IgnoredItemsManager::IsCurrencyIgnored(apiId);
-            }
+            s.isFavorite = s_PersistentFavoriteItems.count(apiId) > 0;
+            s.isIgnored = IgnoredItemsManager::IsItemIgnored(apiId);
+        }
+        else
+        {
+            s.isFavorite = s_PersistentFavoriteCurrencies.count(apiId) > 0;
+            s.isIgnored = IgnoredItemsManager::IsCurrencyIgnored(apiId);
         }
 
         map[apiId] = s;
@@ -232,6 +229,9 @@ static void UpdateOrInsert(std::map<int, Stat>& map,
 void ItemTracker::AddDrop(const std::map<int, long long>& items,
                           const std::map<int, long long>& currencies)
 {
+    // Global Lock Order: 1. s_PersistentMutex, 4. s_SessionDropsMutex, 5. s_Mutex
+    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
+    std::lock_guard<std::mutex> dropsLock(s_SessionDropsMutex);
     std::lock_guard<std::mutex> lock(s_Mutex);
 
     // Get current timestamp
@@ -241,9 +241,6 @@ void ItemTracker::AddDrop(const std::map<int, long long>& items,
     localtime_s(&tm, &now_time);
     char timestamp[32];
     strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", &tm);
-
-    // Always record drops with timestamps for the Timeline
-    std::lock_guard<std::mutex> dropsLock(s_SessionDropsMutex);
 
     for (auto& [id, delta] : items)
     {
@@ -349,7 +346,10 @@ void ItemTracker::SaveCurrentSession()
 
     // Get items and collect top drops and rarity counts
     {
+        // Global Lock Order: 4. s_SessionDropsMutex, 5. s_Mutex
+        std::lock_guard<std::mutex> dropsLock(s_SessionDropsMutex);
         std::lock_guard<std::mutex> lock(s_Mutex);
+        
         sessionData.totalDrops = static_cast<int>(s_Items.size());
 
         // Collect top drops (by value)
@@ -383,7 +383,6 @@ void ItemTracker::SaveCurrentSession()
         }
 
         // Populate allDrops with item details
-        std::lock_guard<std::mutex> dropsLock(s_SessionDropsMutex);
         for (auto& drop : s_SessionDrops)
         {
             // Find item details from current session items
@@ -426,23 +425,21 @@ void ItemTracker::Reset()
     // Clear active notifications
     UINotifications::ClearAll();
 
-    // Lock profit history FIRST to avoid deadlock with UpdateProfitHistory
+    // Global Lock Order: 1. s_PersistentMutex, 2. s_ProfitHistoryMutex, 3. s_SessionStartMutex, 4. s_SessionDropsMutex, 5. s_Mutex
+    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
     std::lock_guard<std::mutex> profitLock(s_ProfitHistoryMutex);
+    std::lock_guard<std::mutex> sessionLock(s_SessionStartMutex);
+    std::lock_guard<std::mutex> dropsLock(s_SessionDropsMutex);
+    std::lock_guard<std::mutex> lock(s_Mutex);
+
     s_ProfitHistory.clear();
     s_LastHistoryUpdate = std::chrono::system_clock::now();
     s_ProfitGoalReached = false;
 
-    std::lock_guard<std::mutex> sessionLock(s_SessionStartMutex);
     s_SessionStart = std::chrono::system_clock::now();
 
-    // Clear session drops
-    {
-        std::lock_guard<std::mutex> dropsLock(s_SessionDropsMutex);
-        s_SessionDrops.clear();
-    }
+    s_SessionDrops.clear();
 
-    // Lock items/currencies LAST (after profit history)
-    std::lock_guard<std::mutex> lock(s_Mutex);
     s_Items.clear();
     s_Currencies.clear();
 }
@@ -486,7 +483,10 @@ std::map<int, Stat> ItemTracker::GetCurrenciesCopy()
 
 Stat ItemTracker::GetItemStat(int itemId)
 {
+    // Global Lock Order: 1. s_PersistentMutex, 5. s_Mutex
+    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
     std::lock_guard<std::mutex> lock(s_Mutex);
+
     auto it = s_Items.find(itemId);
     if (it != s_Items.end()) 
     {
@@ -500,10 +500,7 @@ Stat ItemTracker::GetItemStat(int itemId)
     empty.type = StatType::Item;
     
     // Re-apply persistent flags
-    {
-        std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-        empty.isFavorite = s_PersistentFavoriteItems.count(itemId) > 0;
-    }
+    empty.isFavorite = s_PersistentFavoriteItems.count(itemId) > 0;
     empty.isIgnored = IgnoredItemsManager::IsItemIgnored(itemId);
     
     return empty;
@@ -511,7 +508,10 @@ Stat ItemTracker::GetItemStat(int itemId)
 
 Stat ItemTracker::GetCurrencyStat(int currencyId)
 {
+    // Global Lock Order: 1. s_PersistentMutex, 5. s_Mutex
+    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
     std::lock_guard<std::mutex> lock(s_Mutex);
+
     auto it = s_Currencies.find(currencyId);
     if (it != s_Currencies.end())
     {
@@ -525,10 +525,7 @@ Stat ItemTracker::GetCurrencyStat(int currencyId)
     empty.type = StatType::Currency;
     
     // Re-apply persistent flags
-    {
-        std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-        empty.isFavorite = s_PersistentFavoriteCurrencies.count(currencyId) > 0;
-    }
+    empty.isFavorite = s_PersistentFavoriteCurrencies.count(currencyId) > 0;
     empty.isIgnored = IgnoredItemsManager::IsCurrencyIgnored(currencyId);
     
     return empty;
@@ -657,28 +654,42 @@ std::set<int> ItemTracker::GetFavoriteCurrencyIds()
 std::map<int, Stat> ItemTracker::GetFavoriteItems()
 {
     std::map<int, Stat> favorites;
+    std::string searchTerm = g_Settings.searchTerm;
     
-    // 1. Get current session favorites
+    std::set<int> persistentIds;
     {
-        std::lock_guard<std::mutex> lock(s_Mutex);
-        for (const auto& [id, stat] : s_Items)
-            if (stat.isFavorite)
+        std::lock_guard<std::mutex> pLock(s_PersistentMutex);
+        persistentIds = s_PersistentFavoriteItems;
+    }
+
+    std::lock_guard<std::mutex> lock(s_Mutex);
+
+    // 1. Get current session favorites
+    for (const auto& [id, stat] : s_Items)
+    {
+        if (stat.isFavorite)
+        {
+            if (searchTerm.empty() || SearchManager::MatchesSearch(stat.details.name, searchTerm))
                 favorites[id] = stat;
+        }
     }
     
     // 2. Add persistent favorites that are not in the current session yet
+    for (int id : persistentIds)
     {
-        std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-        for (int id : s_PersistentFavoriteItems)
+        if (favorites.find(id) == favorites.end())
         {
-            if (favorites.find(id) == favorites.end())
+            Stat s;
+            s.apiId = id;
+            s.type = StatType::Item;
+            s.count = 0;
+            s.isFavorite = true;
+            
+            auto it = s_Items.find(id);
+            std::string name = (it != s_Items.end() && it->second.details.loaded) ? it->second.details.name : "";
+            
+            if (searchTerm.empty() || SearchManager::MatchesSearch(name, searchTerm))
             {
-                Stat s;
-                s.apiId = id;
-                s.type = StatType::Item;
-                s.count = 0;
-                s.isFavorite = true;
-                // We don't have details here, they will be loaded by the UI when needed
                 favorites[id] = s;
             }
         }
@@ -690,27 +701,42 @@ std::map<int, Stat> ItemTracker::GetFavoriteItems()
 std::map<int, Stat> ItemTracker::GetFavoriteCurrencies()
 {
     std::map<int, Stat> favorites;
+    std::string searchTerm = g_Settings.searchTerm;
     
-    // 1. Get current session favorites
+    std::set<int> persistentIds;
     {
-        std::lock_guard<std::mutex> lock(s_Mutex);
-        for (const auto& [id, stat] : s_Currencies)
-            if (stat.isFavorite)
+        std::lock_guard<std::mutex> pLock(s_PersistentMutex);
+        persistentIds = s_PersistentFavoriteCurrencies;
+    }
+
+    std::lock_guard<std::mutex> lock(s_Mutex);
+
+    // 1. Get current session favorites
+    for (const auto& [id, stat] : s_Currencies)
+    {
+        if (stat.isFavorite)
+        {
+            if (searchTerm.empty() || SearchManager::MatchesSearchCurrency(stat.details.name, searchTerm))
                 favorites[id] = stat;
+        }
     }
     
     // 2. Add persistent favorites that are not in the current session yet
+    for (int id : persistentIds)
     {
-        std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-        for (int id : s_PersistentFavoriteCurrencies)
+        if (favorites.find(id) == favorites.end())
         {
-            if (favorites.find(id) == favorites.end())
+            Stat s;
+            s.apiId = id;
+            s.type = StatType::Currency;
+            s.count = 0;
+            s.isFavorite = true;
+            
+            auto it = s_Currencies.find(id);
+            std::string name = (it != s_Currencies.end() && it->second.details.loaded) ? it->second.details.name : "";
+            
+            if (searchTerm.empty() || SearchManager::MatchesSearchCurrency(name, searchTerm))
             {
-                Stat s;
-                s.apiId = id;
-                s.type = StatType::Currency;
-                s.count = 0;
-                s.isFavorite = true;
                 favorites[id] = s;
             }
         }
@@ -721,9 +747,10 @@ std::map<int, Stat> ItemTracker::GetFavoriteCurrencies()
 
 std::vector<SessionHistory::DropEntry> ItemTracker::GetSessionDropsCopy()
 {
-    // Lock mutexes in the same order as AddDrop to avoid deadlock: s_Mutex first, then s_SessionDropsMutex
-    std::lock_guard<std::mutex> statsLock(s_Mutex);
+    // Global Lock Order: 4. s_SessionDropsMutex, 5. s_Mutex
     std::lock_guard<std::mutex> lock(s_SessionDropsMutex);
+    std::lock_guard<std::mutex> statsLock(s_Mutex);
+    
     std::vector<SessionHistory::DropEntry> drops = s_SessionDrops;
     for (auto& drop : drops)
     {
@@ -998,6 +1025,10 @@ std::map<int, Stat> ItemTracker::GetFilteredItems()
 
         for (const auto& [id, stat] : s_Items)
         {
+            // Only include items that have actually dropped in this session
+            // or are salvage kits with negative counts.
+            if (stat.count == 0) continue;
+
             Stat copy = stat;
             copy.isIgnored = IgnoredItemsManager::IsItemIgnored(id);
             if (PassesFilter(copy))
@@ -1044,6 +1075,10 @@ std::map<int, Stat> ItemTracker::GetFilteredCurrencies()
         if (id == 44602 || id == 67027 || id == 89409)
             continue;
 
+        // Only include currencies that have actually dropped in this session
+        // (Gold/Coin ID 1 is always included via PassesFilter)
+        if (st.count == 0 && id != 1) continue;
+
         st.isIgnored = IgnoredItemsManager::IsCurrencyIgnored(id);
         if (PassesFilter(st))
             filtered[id] = st;
@@ -1083,7 +1118,7 @@ std::map<int, Stat> ItemTracker::GetSearchedCurrencies(const std::string& search
 // Multi-Sort implementation
 std::vector<std::pair<int, Stat>> ItemTracker::GetSortedItems(SortMode mode, bool)
 {
-    auto items = GetFilteredItems();
+    auto items = GetSearchedItems(g_Settings.searchTerm);
     std::vector<std::pair<int, Stat>> sorted(items.begin(), items.end());
 
     std::sort(sorted.begin(), sorted.end(), [mode](const auto& a, const auto& b) {
@@ -1133,7 +1168,7 @@ std::vector<std::pair<int, Stat>> ItemTracker::GetSortedItems(SortMode mode, boo
 
 std::vector<std::pair<int, Stat>> ItemTracker::GetSortedCurrencies(SortMode mode, bool)
 {
-    auto currencies = GetFilteredCurrencies();
+    auto currencies = GetSearchedCurrencies(g_Settings.searchTerm);
     std::vector<std::pair<int, Stat>> sorted(currencies.begin(), currencies.end());
 
     std::sort(sorted.begin(), sorted.end(), [mode](const auto& a, const auto& b) {
@@ -1567,6 +1602,11 @@ void ItemTracker::SaveData(const char* addonDir)
 
     std::string dataPath = std::string(addonDir) + "\\farming_data.json";
     
+    // Global Lock Order: 1. s_PersistentMutex, 4. s_SessionDropsMutex, 5. s_Mutex
+    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
+    std::lock_guard<std::mutex> dropsLock(s_SessionDropsMutex);
+    std::lock_guard<std::mutex> lock(s_Mutex);
+
     nlohmann::json data;
     data["timestamp"] = std::chrono::system_clock::now().time_since_epoch().count();
     data["sessionStart"] = std::chrono::system_clock::to_time_t(s_SessionStart);
@@ -1574,55 +1614,46 @@ void ItemTracker::SaveData(const char* addonDir)
 
     // Save items
     nlohmann::json itemsArray = nlohmann::json::array();
+    for (const auto& [id, stat] : s_Items)
     {
-        std::lock_guard<std::mutex> lock(s_Mutex);
-        for (const auto& [id, stat] : s_Items)
-        {
-            nlohmann::json item;
-            item["apiId"] = id;
-            item["count"] = stat.count;
-            item["isFavorite"] = stat.isFavorite;
-            item["lastMagicFind"] = stat.lastMagicFind;
-            itemsArray.push_back(item);
-        }
+        nlohmann::json item;
+        item["apiId"] = id;
+        item["count"] = stat.count;
+        item["isFavorite"] = stat.isFavorite;
+        item["lastMagicFind"] = stat.lastMagicFind;
+        itemsArray.push_back(item);
     }
     data["items"] = itemsArray;
 
     // Save currencies
     nlohmann::json currenciesArray = nlohmann::json::array();
+    for (const auto& [id, stat] : s_Currencies)
     {
-        std::lock_guard<std::mutex> lock(s_Mutex);
-        for (const auto& [id, stat] : s_Currencies)
-        {
-            nlohmann::json currency;
-            currency["apiId"] = id;
-            currency["count"] = stat.count;
-            currency["isFavorite"] = stat.isFavorite;
-            currency["lastMagicFind"] = stat.lastMagicFind;
-            currenciesArray.push_back(currency);
-        }
+        nlohmann::json currency;
+        currency["apiId"] = id;
+        currency["count"] = stat.count;
+        currency["isFavorite"] = stat.isFavorite;
+        currency["lastMagicFind"] = stat.lastMagicFind;
+        currenciesArray.push_back(currency);
     }
     data["currencies"] = currenciesArray;
 
     // Save session drops (for Timeline tab)
     nlohmann::json dropsArray = nlohmann::json::array();
+    for (const auto& drop : s_SessionDrops)
     {
-        std::lock_guard<std::mutex> lock(s_SessionDropsMutex);
-        for (const auto& drop : s_SessionDrops)
-        {
-            nlohmann::json dropJson;
-            dropJson["itemId"] = drop.itemId;
-            dropJson["itemName"] = drop.itemName;
-            dropJson["iconUrl"] = drop.iconUrl;
-            dropJson["isCurrency"] = drop.isCurrency;
-            dropJson["rarity"] = drop.rarity;
-            dropJson["count"] = drop.count;
-            dropJson["totalValue"] = drop.totalValue;
-            dropJson["magicFind"] = drop.magicFind;
-            dropJson["timestamp"] = drop.timestamp;
-            dropJson["characterName"] = drop.characterName;
-            dropsArray.push_back(dropJson);
-        }
+        nlohmann::json dropJson;
+        dropJson["itemId"] = drop.itemId;
+        dropJson["itemName"] = drop.itemName;
+        dropJson["iconUrl"] = drop.iconUrl;
+        dropJson["isCurrency"] = drop.isCurrency;
+        dropJson["rarity"] = drop.rarity;
+        dropJson["count"] = drop.count;
+        dropJson["totalValue"] = drop.totalValue;
+        dropJson["magicFind"] = drop.magicFind;
+        dropJson["timestamp"] = drop.timestamp;
+        dropJson["characterName"] = drop.characterName;
+        dropsArray.push_back(dropJson);
     }
     data["sessionDrops"] = dropsArray;
 
@@ -1646,13 +1677,11 @@ void ItemTracker::SaveData(const char* addonDir)
     // Save favorites (Persistent stores)
     nlohmann::json favoriteItemsArray = nlohmann::json::array();
     nlohmann::json favoriteCurrenciesArray = nlohmann::json::array();
-    {
-        std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-        for (int id : s_PersistentFavoriteItems)
-            favoriteItemsArray.push_back(id);
-        for (int id : s_PersistentFavoriteCurrencies)
-            favoriteCurrenciesArray.push_back(id);
-    }
+    for (int id : s_PersistentFavoriteItems)
+        favoriteItemsArray.push_back(id);
+    for (int id : s_PersistentFavoriteCurrencies)
+        favoriteCurrenciesArray.push_back(id);
+    
     data["favoriteItems"] = favoriteItemsArray;
     data["favoriteCurrencies"] = favoriteCurrenciesArray;
 
@@ -1864,7 +1893,10 @@ void ItemTracker::LoadData(const char* addonDir)
 
 std::vector<int> ItemTracker::CollectPendingItemIds()
 {
+    // Global Lock Order: 1. s_PersistentMutex, 5. s_Mutex
+    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
     std::lock_guard<std::mutex> lock(s_Mutex);
+
     std::set<int> ids;
     for (auto& [id, st] : s_Items)
     {
@@ -1874,14 +1906,11 @@ std::vector<int> ItemTracker::CollectPendingItemIds()
     }
     
     // Also include persistent items (favorites, ignored, custom profit)
+    for (int id : s_PersistentFavoriteItems)
     {
-        std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-        for (int id : s_PersistentFavoriteItems)
-        {
-            auto it = s_Items.find(id);
-            if (it == s_Items.end() || !it->second.details.loaded)
-                ids.insert(id);
-        }
+        auto it = s_Items.find(id);
+        if (it == s_Items.end() || !it->second.details.loaded)
+            ids.insert(id);
     }
     
     // Ignored items
@@ -1916,6 +1945,8 @@ std::vector<int> ItemTracker::CollectPendingItemIds()
 
 bool ItemTracker::NeedCurrencyTable()
 {
+    // Global Lock Order: 1. s_PersistentMutex, 5. s_Mutex
+    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
     std::lock_guard<std::mutex> lock(s_Mutex);
     
     // Check current session currencies
@@ -1926,15 +1957,12 @@ bool ItemTracker::NeedCurrencyTable()
     }
 
     // Check persistent currencies
+    for (int id : s_PersistentFavoriteCurrencies)
     {
-        std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-        for (int id : s_PersistentFavoriteCurrencies)
-        {
-            if (id == 1) continue;
-            auto it = s_Currencies.find(id);
-            if (it == s_Currencies.end() || !it->second.details.loaded)
-                return true;
-        }
+        if (id == 1) continue;
+        auto it = s_Currencies.find(id);
+        if (it == s_Currencies.end() || !it->second.details.loaded)
+            return true;
     }
 
     auto ignoredCurrencies = IgnoredItemsManager::GetIgnoredCurrencies();
@@ -2005,6 +2033,8 @@ void ItemTracker::ApplyItemsFromApi(const json& itemsArray, const json& pricesAr
 {
     if (!itemsArray.is_array() || !pricesArray.is_array()) return;
 
+    // Global Lock Order: 1. s_PersistentMutex, 5. s_Mutex
+    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
     std::lock_guard<std::mutex> lock(s_Mutex);
 
     for (auto& item : itemsArray)
@@ -2050,10 +2080,7 @@ void ItemTracker::ApplyItemsFromApi(const json& itemsArray, const json& pricesAr
             st = &s_Items[id];
             
             // Re-apply persistent flags
-            {
-                std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-                st->isFavorite = s_PersistentFavoriteItems.count(id) > 0;
-            }
+            st->isFavorite = s_PersistentFavoriteItems.count(id) > 0;
             st->isIgnored = IgnoredItemsManager::IsItemIgnored(id);
         }
 
@@ -2220,6 +2247,8 @@ void ItemTracker::ApplyCurrencyTable(const json& currenciesArray)
 {
     if (!currenciesArray.is_array()) return;
 
+    // Global Lock Order: 1. s_PersistentMutex, 5. s_Mutex
+    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
     std::lock_guard<std::mutex> lock(s_Mutex);
 
     for (auto& c : currenciesArray)
@@ -2234,10 +2263,7 @@ void ItemTracker::ApplyCurrencyTable(const json& currenciesArray)
             // Only add currencies that are persistent (favorites, ignored, custom profit)
             // or if they are basic coins (ID 1)
             bool isPersistent = false;
-            {
-                std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-                if (s_PersistentFavoriteCurrencies.count(id) > 0) isPersistent = true;
-            }
+            if (s_PersistentFavoriteCurrencies.count(id) > 0) isPersistent = true;
             if (IgnoredItemsManager::IsCurrencyIgnored(id)) isPersistent = true;
             if (CustomProfitManager::HasCustomProfit(id) && CustomProfitManager::GetType(id) == StatType::Currency) isPersistent = true;
             
@@ -2251,10 +2277,7 @@ void ItemTracker::ApplyCurrencyTable(const json& currenciesArray)
                 st = &s_Currencies[id];
                 
                 // Re-apply flags
-                {
-                    std::lock_guard<std::mutex> pLock(s_PersistentMutex);
-                    st->isFavorite = s_PersistentFavoriteCurrencies.count(id) > 0;
-                }
+                st->isFavorite = s_PersistentFavoriteCurrencies.count(id) > 0;
                 st->isIgnored = IgnoredItemsManager::IsCurrencyIgnored(id);
             }
         }
