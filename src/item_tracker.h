@@ -63,6 +63,7 @@ namespace ItemTracker
     void SetMagicFind(int magicFind);
     int  GetMagicFind();
     void Reset();
+    void SafeReset(); // Reset session data while preserving favorites, ignored items and custom profits
     void SaveCurrentSession();
     void ClearPersistedData(const char* addonDir);
 

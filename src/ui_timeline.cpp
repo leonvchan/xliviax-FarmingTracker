@@ -101,6 +101,11 @@ namespace UITimeline
         
         std::reverse(timestamps.begin(), timestamps.end()); // Newest first
 
+        int openItemMenuId = -1;
+        std::string openItemMenuName;
+        int openCurrencyMenuId = -1;
+        std::string openCurrencyMenuName;
+
         if (ImGui::BeginChild("TimelineDropsScroll", ImVec2(0, 0), true))
         {
             if (timestamps.empty())
@@ -188,9 +193,9 @@ namespace UITimeline
                             // Right-click context menu for currencies
                             if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
                             {
-                                UIContextMenu::OpenContextMenu("TimelineCurrencyContextMenu", itemId, currencyNames[itemId]);
+                                openCurrencyMenuId = itemId;
+                                openCurrencyMenuName = currencyNames[itemId];
                             }
-                            UIContextMenu::RenderCurrencyContextMenu("TimelineCurrencyContextMenu", UIContextMenu::ContextMenuType::General);
                             
                             ImGui::SameLine();
                             ImGui::PopID();
@@ -237,9 +242,9 @@ namespace UITimeline
                         // Right-click context menu for items
                         if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
                         {
-                            UIContextMenu::OpenContextMenu("TimelineItemContextMenu", d.itemId, d.itemName);
+                            openItemMenuId = d.itemId;
+                            openItemMenuName = d.itemName;
                         }
-                        UIContextMenu::RenderItemContextMenu("TimelineItemContextMenu", UIContextMenu::ContextMenuType::General);
                         
                         ImGui::EndGroup();
                         ImGui::SameLine();
@@ -253,6 +258,16 @@ namespace UITimeline
                     ImGui::Spacing();
                 }
             }
+
+            // Open context menus if requested (Inside the child window ID scope)
+            if (openCurrencyMenuId != -1)
+                UIContextMenu::OpenContextMenu("TimelineCurrencyContextMenu", openCurrencyMenuId, openCurrencyMenuName);
+            if (openItemMenuId != -1)
+                UIContextMenu::OpenContextMenu("TimelineItemContextMenu", openItemMenuId, openItemMenuName);
+
+            // Render context menus (Inside the child window ID scope)
+            UIContextMenu::RenderCurrencyContextMenu("TimelineCurrencyContextMenu", UIContextMenu::ContextMenuType::General);
+            UIContextMenu::RenderItemContextMenu("TimelineItemContextMenu", UIContextMenu::ContextMenuType::General);
         }
         ImGui::EndChild();
     }

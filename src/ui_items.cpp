@@ -131,13 +131,12 @@ void RenderItemsTab()
     {
         // Grid View
         float cellSize = static_cast<float>(g_Settings.gridIconSize) + 10.0f; // icon + padding
-        float availWidth = ImGui::GetContentRegionAvail().x;
-        int columns = std::clamp(static_cast<int>(availWidth / cellSize), 2, 50);
+        float spacing = ImGui::GetStyle().ItemSpacing.x;
+        float scrollbarWidth = 20.0f; // Safer buffer for scrollbar
         
-        // Adjust cellSize if columns are calculated, to fill the space better if needed
-        // but keeping it simple for now to avoid side effects.
-        // Subtracting a bit more for the scrollbar if it might appear
-        if (availWidth > 20.0f) columns = std::clamp(static_cast<int>((availWidth - 15.0f) / cellSize), 2, 50);
+        auto getColumns = [&](float width) {
+            return std::max(1, static_cast<int>((width - scrollbarWidth + spacing) / (cellSize + spacing)));
+        };
 
         // Group by Rarity options
         if (ImGui::Checkbox(Localization::GetText("group_by_rarity"), &g_Settings.groupByRarity))
@@ -243,6 +242,7 @@ void RenderItemsTab()
                             if (ImGui::BeginTabItem(rarityName.c_str(), &isSelected))
                             {
                                 selectedRarityTab = tabIndex;
+                                int columns = getColumns(ImGui::GetContentRegionAvail().x);
                                 int col = 0;
                                 for (auto& [id, st] : it->second)
                                 {
@@ -323,6 +323,7 @@ void RenderItemsTab()
                         if (ImGui::CollapsingHeader(rarityName.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                         {
                             ImGui::PopStyleColor(2);
+                            int columns = getColumns(ImGui::GetContentRegionAvail().x);
                             int col = 0;
                             for (auto& [id, st] : it->second)
                             {
@@ -439,6 +440,7 @@ void RenderItemsTab()
                             if (ImGui::BeginTabItem(typeName.c_str(), &isSelected))
                             {
                                 selectedTypeTab = tabIndex;
+                                int columns = getColumns(ImGui::GetContentRegionAvail().x);
                                 int col = 0;
                                 for (auto& [id, st] : it->second)
                                 {
@@ -514,6 +516,7 @@ void RenderItemsTab()
                         if (ImGui::CollapsingHeader(getTypeName(type).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                         {
                             ImGui::PopStyleColor(2);
+                            int columns = getColumns(ImGui::GetContentRegionAvail().x);
                             int col = 0;
                             for (auto& [id, st] : it->second)
                             {
@@ -578,6 +581,7 @@ void RenderItemsTab()
             else
             {
                 // Normal grid view without grouping
+                int columns = getColumns(ImGui::GetContentRegionAvail().x);
                 int col = 0;
                 for (auto& [id, st] : sortedItems)
                 {

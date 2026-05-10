@@ -297,10 +297,10 @@ void RenderOptions()
                         Gw2Fetcher::UpdateApiKey();
                     }
 
-                    // Reset farming session
-                    ItemTracker::Reset();
+                    // Reset farming session, preserving favorites/ignored/custom profit
+                    ItemTracker::SafeReset();
                     const char* addonDir = APIDefs ? APIDefs->Paths_GetAddonDirectory("FarmingTracker") : nullptr;
-                    ItemTracker::ClearPersistedData(addonDir);
+                    ItemTracker::SaveData(addonDir);
                     SettingsManager::Save();
                 }
             }

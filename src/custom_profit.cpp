@@ -5,11 +5,12 @@
 std::mutex CustomProfitManager::s_Mutex;
 std::map<int, CustomProfitEntry> CustomProfitManager::s_CustomProfits;
 
-void CustomProfitManager::SetCustomProfit(int apiId, long long profitCopper)
+void CustomProfitManager::SetCustomProfit(int apiId, long long profitCopper, StatType type)
 {
     std::lock_guard<std::mutex> lock(s_Mutex);
     s_CustomProfits[apiId].customProfitCopper = profitCopper;
     s_CustomProfits[apiId].hasCustomProfit = true;
+    s_CustomProfits[apiId].type = type;
 }
 
 long long CustomProfitManager::GetCustomProfit(int apiId)
@@ -19,6 +20,13 @@ long long CustomProfitManager::GetCustomProfit(int apiId)
     return (it != s_CustomProfits.end() && it->second.hasCustomProfit) 
         ? it->second.customProfitCopper 
         : 0;
+}
+
+StatType CustomProfitManager::GetType(int apiId)
+{
+    std::lock_guard<std::mutex> lock(s_Mutex);
+    auto it = s_CustomProfits.find(apiId);
+    return (it != s_CustomProfits.end()) ? it->second.type : StatType::Item;
 }
 
 bool CustomProfitManager::HasCustomProfit(int apiId)
@@ -52,4 +60,10 @@ std::map<int, long long> CustomProfitManager::GetAllCustomProfits()
         }
     }
     return result;
+}
+
+std::map<int, CustomProfitEntry> CustomProfitManager::GetAllCustomProfitsDetailed()
+{
+    std::lock_guard<std::mutex> lock(s_Mutex);
+    return s_CustomProfits;
 }

@@ -44,45 +44,42 @@ void RenderIgnoredTab()
 
             for (auto& id : ignoredItems)
             {
-                auto items = ItemTracker::GetItemsCopy();
-                if (items.find(id) != items.end())
+                Stat st = ItemTracker::GetItemStat(id);
+                
+                float rowH = UICommon::CalcTableRowHeight(static_cast<float>(g_Settings.iconSize));
+                ImGui::TableNextRow(0, rowH);
+
+                ImGui::TableSetColumnIndex(0);
+                UICommon::AlignTableCellIcon(rowH, static_cast<float>(g_Settings.iconSize));
+                UICommon::DrawItemIconCell(id, st.details.iconUrl, static_cast<float>(g_Settings.iconSize), st.details.loaded ? st.details.rarity : "");
+
+                // Right-click context menu
+                if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
                 {
-                    auto& st = items[id];
-                    float rowH = UICommon::CalcTableRowHeight(static_cast<float>(g_Settings.iconSize));
-                    ImGui::TableNextRow(0, rowH);
-
-                    ImGui::TableSetColumnIndex(0);
-                    UICommon::AlignTableCellIcon(rowH, static_cast<float>(g_Settings.iconSize));
-                    UICommon::DrawItemIconCell(id, st.details.iconUrl, static_cast<float>(g_Settings.iconSize), st.details.loaded ? st.details.rarity : "");
-
-                    // Right-click context menu
-                    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
-                    {
-                        UIContextMenu::OpenContextMenu("IgnoredItemContextMenu", id, st.details.loaded ? st.details.name : "");
-                    }
-
-                    ImGui::TableSetColumnIndex(1);
-                    UICommon::AlignTableCellText(rowH);
-                    std::string name = st.details.loaded ? st.details.name : Localization::GetText("loading");
-                    ImGui::Text("%s", name.c_str());
-
-                    // Right-click context menu for name
-                    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
-                    {
-                        UIContextMenu::OpenContextMenu("IgnoredItemContextMenu", id, st.details.loaded ? st.details.name : "");
-                    }
-
-                    ImGui::TableSetColumnIndex(2);
-                    UICommon::AlignTableCellFrame(rowH);
-                    bool isIgnored = true;
-                    if (ImGui::Checkbox(("##unign_" + std::to_string(id)).c_str(), &isIgnored))
-                    {
-                        if (!isIgnored)
-                            IgnoredItemsManager::UnignoreItem(id);
-                    }
-                    if (ImGui::IsItemHovered())
-                        ImGui::SetTooltip("%s", Localization::GetText("unignore_item"));
+                    UIContextMenu::OpenContextMenu("IgnoredItemContextMenu", id, st.details.loaded ? st.details.name : "");
                 }
+
+                ImGui::TableSetColumnIndex(1);
+                UICommon::AlignTableCellText(rowH);
+                std::string name = st.details.loaded ? st.details.name : Localization::GetText("loading");
+                ImGui::Text("%s", name.c_str());
+
+                // Right-click context menu for name
+                if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
+                {
+                    UIContextMenu::OpenContextMenu("IgnoredItemContextMenu", id, st.details.loaded ? st.details.name : "");
+                }
+
+                ImGui::TableSetColumnIndex(2);
+                UICommon::AlignTableCellFrame(rowH);
+                bool isIgnored = true;
+                if (ImGui::Checkbox(("##unign_" + std::to_string(id)).c_str(), &isIgnored))
+                {
+                    if (!isIgnored)
+                        IgnoredItemsManager::UnignoreItem(id);
+                }
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s", Localization::GetText("unignore_item"));
             }
 
             // Context menu popup (rendered once outside the loop)
@@ -126,66 +123,63 @@ void RenderIgnoredTab()
 
             for (auto& id : ignoredCurrencies)
             {
-                auto currencies = ItemTracker::GetCurrenciesCopy();
-                if (currencies.find(id) != currencies.end())
+                Stat st = ItemTracker::GetCurrencyStat(id);
+                
+                float rowH = UICommon::CalcTableRowHeight(static_cast<float>(g_Settings.iconSize));
+                ImGui::TableNextRow(0, rowH);
+
+                ImGui::TableSetColumnIndex(0);
+                UICommon::AlignTableCellIcon(rowH, static_cast<float>(g_Settings.iconSize));
+                std::string iconUrl = st.details.iconUrl;
+                if (id == 1 && iconUrl.empty())
+                    iconUrl = "https://wiki.guildwars2.com/images/e/eb/Copper_coin.png";
+                UICommon::DrawItemIconCell(id, iconUrl, static_cast<float>(g_Settings.iconSize), st.details.loaded ? st.details.rarity : "");
+
+                // Right-click context menu
+                if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
                 {
-                    auto& st = currencies[id];
-                    float rowH = UICommon::CalcTableRowHeight(static_cast<float>(g_Settings.iconSize));
-                    ImGui::TableNextRow(0, rowH);
-
-                    ImGui::TableSetColumnIndex(0);
-                    UICommon::AlignTableCellIcon(rowH, static_cast<float>(g_Settings.iconSize));
-                    std::string iconUrl = st.details.iconUrl;
-                    if (id == 1 && iconUrl.empty())
-                        iconUrl = "https://wiki.guildwars2.com/images/e/eb/Copper_coin.png";
-                    UICommon::DrawItemIconCell(id, iconUrl, static_cast<float>(g_Settings.iconSize), st.details.loaded ? st.details.rarity : "");
-
-                    // Right-click context menu
-                    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
-                    {
-                        UIContextMenu::OpenContextMenu("IgnoredCurrencyContextMenu", id, st.details.loaded ? st.details.name : "");
-                    }
-
-                    ImGui::TableSetColumnIndex(1);
-                    UICommon::AlignTableCellText(rowH);
-                    std::string name = st.details.loaded ? st.details.name : (id == 1 ? Localization::GetText("coin") : Localization::GetText("loading"));
-                    ImGui::Text("%s", name.c_str());
-
-                    // Right-click context menu for name
-                    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
-                    {
-                        UIContextMenu::OpenContextMenu("IgnoredCurrencyContextMenu", id, st.details.loaded ? st.details.name : "");
-                    }
-
-                    ImGui::TableSetColumnIndex(2);
-                    // Special display for Coin (ID 1) - show Gold/Silver/Copper with colored icons
-                    if (id == 1)
-                    {
-                        UICommon::AlignTableCellFrame(rowH);
-                        UICommon::DrawCoinDisplay(st.count);
-                        if (ImGui::IsItemHovered())
-                            ImGui::SetTooltip("Gold: %lld", st.count);
-                    }
-                    else
-                    {
-                        UICommon::AlignTableCellText(rowH);
-                        ImVec4 countColor = st.count > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.count < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
-                        ImGui::TextColored(countColor, "%lld", st.count);
-                        if (ImGui::IsItemHovered())
-                            ImGui::SetTooltip("Count: %lld", st.count);
-                    }
-
-                    ImGui::TableSetColumnIndex(3);
-                    UICommon::AlignTableCellFrame(rowH);
-                    bool isIgnored = true;
-                    if (ImGui::Checkbox(("##unign_cur_" + std::to_string(id)).c_str(), &isIgnored))
-                    {
-                        if (!isIgnored)
-                            IgnoredItemsManager::UnignoreCurrency(id);
-                    }
-                    if (ImGui::IsItemHovered())
-                        ImGui::SetTooltip("%s", Localization::GetText("unignore_currency"));
+                    UIContextMenu::OpenContextMenu("IgnoredCurrencyContextMenu", id, st.details.loaded ? st.details.name : "");
                 }
+
+                ImGui::TableSetColumnIndex(1);
+                UICommon::AlignTableCellText(rowH);
+                std::string name = st.details.loaded ? st.details.name : (id == 1 ? Localization::GetText("coin") : Localization::GetText("loading"));
+                ImGui::Text("%s", name.c_str());
+
+                // Right-click context menu for name
+                if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
+                {
+                    UIContextMenu::OpenContextMenu("IgnoredCurrencyContextMenu", id, st.details.loaded ? st.details.name : "");
+                }
+
+                ImGui::TableSetColumnIndex(2);
+                // Special display for Coin (ID 1) - show Gold/Silver/Copper with colored icons
+                if (id == 1)
+                {
+                    UICommon::AlignTableCellFrame(rowH);
+                    UICommon::DrawCoinDisplay(st.count);
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("Gold: %lld", st.count);
+                }
+                else
+                {
+                    UICommon::AlignTableCellText(rowH);
+                    ImVec4 countColor = st.count > 0 ? ImVec4(1.f, 0.84f, 0.f, 1.f) : (st.count < 0 ? ImVec4(0.9f, 0.2f, 0.2f, 1.f) : ImVec4(1.f, 1.f, 1.f, 1.f));
+                    ImGui::TextColored(countColor, "%lld", st.count);
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("Count: %lld", st.count);
+                }
+
+                ImGui::TableSetColumnIndex(3);
+                UICommon::AlignTableCellFrame(rowH);
+                bool isIgnored = true;
+                if (ImGui::Checkbox(("##unign_cur_" + std::to_string(id)).c_str(), &isIgnored))
+                {
+                    if (!isIgnored)
+                        IgnoredItemsManager::UnignoreCurrency(id);
+                }
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s", Localization::GetText("unignore_currency"));
             }
 
             // Context menu popup (rendered once outside the loop)

@@ -27,6 +27,8 @@
 #include "auto_reset.h"
 #include "localization.h"
 #include "resource.h"
+#include "custom_profit.h"
+#include "ignored_items.h"
 #include "../include/nexus/Nexus.h"
 #include "../include/imgui/imgui.h"
 #include "../include/imgui/imgui_internal.h"
@@ -202,6 +204,13 @@ static void PersistMainTabOrderFromImGui(ImGuiTabBar* tabBar)
     }
 }
 
+static void SafeReset()
+{
+    ItemTracker::SafeReset();
+    const char* addonDir = APIDefs ? APIDefs->Paths_GetAddonDirectory("FarmingTracker") : nullptr;
+    ItemTracker::SaveData(addonDir);
+}
+
 static void RenderMainWindow()
 {
     if (!g_Settings.showMainWindow) return;
@@ -260,9 +269,7 @@ static void RenderMainWindow()
         ImGui::SameLine();
         if (ImGui::SmallButton(Localization::GetText("reset_button")))
         {
-            ItemTracker::Reset();
-            const char* addonDir = APIDefs ? APIDefs->Paths_GetAddonDirectory("FarmingTracker") : nullptr;
-            ItemTracker::ClearPersistedData(addonDir);
+            SafeReset();
             AutoReset::OnManualReset();
         }
         if (ImGui::IsItemHovered())

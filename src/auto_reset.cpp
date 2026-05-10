@@ -176,20 +176,9 @@ void AutoReset::OnAddonLoad()
 
     if (ShouldResetNowOnLoad())
     {
-        // Save favorite settings before reset
         const char* addonDir = APIDefs ? APIDefs->Paths_GetAddonDirectory("FarmingTracker") : nullptr;
-        std::set<int> favoriteItems = ItemTracker::GetFavoriteItemIds();
-        std::set<int> favoriteCurrencies = ItemTracker::GetFavoriteCurrencyIds();
-
-        ItemTracker::Reset();
-        ItemTracker::ClearPersistedData(addonDir);
-
-        // Restore favorite settings after reset
-        for (int itemId : favoriteItems)
-            ItemTracker::SetFavorite(itemId, true);
-        for (int currencyId : favoriteCurrencies)
-            ItemTracker::SetFavorite(currencyId, true);
-
+        ItemTracker::SafeReset();
+        ItemTracker::SaveData(addonDir);
         SettingsManager::Save();
     }
 
@@ -267,19 +256,11 @@ void AutoReset::Tick()
 
     // Save favorite settings before reset
     const char* addonDir = APIDefs ? APIDefs->Paths_GetAddonDirectory("FarmingTracker") : nullptr;
-    std::set<int> favoriteItems = ItemTracker::GetFavoriteItemIds();
-    std::set<int> favoriteCurrencies = ItemTracker::GetFavoriteCurrencyIds();
 
-    ItemTracker::Reset();
+    ItemTracker::SafeReset();
 
-    // Clear persisted data after reset
-    ItemTracker::ClearPersistedData(addonDir);
-
-    // Restore favorite settings after reset
-    for (int itemId : favoriteItems)
-        ItemTracker::SetFavorite(itemId, true);
-    for (int currencyId : favoriteCurrencies)
-        ItemTracker::SetFavorite(currencyId, true);
+    // Persist the reset state immediately to avoid data loss on crash
+    ItemTracker::SaveData(addonDir);
 
     UpdateNextResetDateTime();
     SettingsManager::Save();

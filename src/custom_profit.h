@@ -3,6 +3,8 @@
 #include <string>
 #include <mutex>
 
+#include "item_tracker.h"
+
 // ---------------------------------------------------------------------------
 // Custom Profit System - provides custom profit functionality
 // Allows users to set custom profit values for items/currencies
@@ -12,6 +14,7 @@ struct CustomProfitEntry
 {
     long long customProfitCopper = 0;
     bool hasCustomProfit = false;
+    StatType type = StatType::Item;
 };
 
 class CustomProfitManager
@@ -22,10 +25,13 @@ private:
 
 public:
     // Set custom profit for an item/currency
-    static void SetCustomProfit(int apiId, long long profitCopper);
+    static void SetCustomProfit(int apiId, long long profitCopper, StatType type = StatType::Item);
     
     // Get custom profit for an item/currency
     static long long GetCustomProfit(int apiId);
+
+    // Get type for a custom profit
+    static StatType GetType(int apiId);
     
     // Check if item has custom profit
     static bool HasCustomProfit(int apiId);
@@ -38,4 +44,7 @@ public:
     
     // Get all custom profits
     static std::map<int, long long> GetAllCustomProfits();
+
+    // Get all custom profits with types
+    static std::map<int, CustomProfitEntry> GetAllCustomProfitsDetailed();
 };

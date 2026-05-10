@@ -53,7 +53,7 @@ void RenderCustomProfitTab()
         if (itemIdInput > 0)
         {
             long long totalCopper = (long long)itemGoldInput * 10000 + (long long)itemSilverInput * 100 + itemCopperInput;
-            CustomProfitManager::SetCustomProfit(itemIdInput, totalCopper);
+            CustomProfitManager::SetCustomProfit(itemIdInput, totalCopper, StatType::Item);
         }
     }
     if (ImGui::IsItemHovered())
@@ -90,7 +90,7 @@ void RenderCustomProfitTab()
         if (currencyIdInput > 0)
         {
             long long totalCopper = (long long)currencyGoldInput * 10000 + (long long)currencySilverInput * 100 + currencyCopperInput;
-            CustomProfitManager::SetCustomProfit(currencyIdInput, totalCopper);
+            CustomProfitManager::SetCustomProfit(currencyIdInput, totalCopper, StatType::Currency);
         }
     }
     if (ImGui::IsItemHovered())
@@ -103,13 +103,13 @@ void RenderCustomProfitTab()
     ImGui::Text("%s", Localization::GetText("custom_profit_items_header"));
     ImGui::Separator();
 
-    auto items = ItemTracker::GetItemsCopy();
+    auto allCustomProfitsDetailed = CustomProfitManager::GetAllCustomProfitsDetailed();
     std::vector<std::pair<int, long long>> customProfitItems;
-    for (auto& [id, st] : items)
+    for (auto& [id, entry] : allCustomProfitsDetailed)
     {
-        if (CustomProfitManager::HasCustomProfit(id))
+        if (entry.type == StatType::Item)
         {
-            customProfitItems.push_back({id, CustomProfitManager::GetCustomProfit(id)});
+            customProfitItems.push_back({id, entry.customProfitCopper});
         }
     }
 
@@ -129,9 +129,7 @@ void RenderCustomProfitTab()
 
             for (auto& [id, profit] : customProfitItems)
             {
-                auto it = items.find(id);
-                if (it == items.end()) continue;
-                auto& st = it->second;
+                Stat st = ItemTracker::GetItemStat(id);
 
                 float rowH = UICommon::CalcTableRowHeight(32.0f);
                 ImGui::TableNextRow(0, rowH);
@@ -186,13 +184,12 @@ void RenderCustomProfitTab()
     ImGui::Text("%s", Localization::GetText("custom_profit_currencies_header"));
     ImGui::Separator();
 
-    auto currencies = ItemTracker::GetCurrenciesCopy();
     std::vector<std::pair<int, long long>> customProfitCurrencies;
-    for (auto& [id, st] : currencies)
+    for (auto& [id, entry] : allCustomProfitsDetailed)
     {
-        if (CustomProfitManager::HasCustomProfit(id))
+        if (entry.type == StatType::Currency)
         {
-            customProfitCurrencies.push_back({id, CustomProfitManager::GetCustomProfit(id)});
+            customProfitCurrencies.push_back({id, entry.customProfitCopper});
         }
     }
 
@@ -212,16 +209,17 @@ void RenderCustomProfitTab()
 
             for (auto& [id, profit] : customProfitCurrencies)
             {
-                auto it = currencies.find(id);
-                if (it == currencies.end()) continue;
-                auto& st = it->second;
+                Stat st = ItemTracker::GetCurrencyStat(id);
 
                 float rowH = UICommon::CalcTableRowHeight(32.0f);
                 ImGui::TableNextRow(0, rowH);
 
                 ImGui::TableSetColumnIndex(0);
                 UICommon::AlignTableCellIcon(rowH, 32.0f);
-                UICommon::DrawItemIconCell(id, st.details.iconUrl, 32.0f, st.details.loaded ? st.details.rarity : "");
+                std::string iconUrl = st.details.iconUrl;
+                if (id == 1 && iconUrl.empty())
+                    iconUrl = "https://wiki.guildwars2.com/images/e/eb/Copper_coin.png";
+                UICommon::DrawItemIconCell(id, iconUrl, 32.0f, st.details.loaded ? st.details.rarity : "");
 
                 // Right-click context menu
                 if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))
@@ -231,7 +229,7 @@ void RenderCustomProfitTab()
 
                 ImGui::TableSetColumnIndex(1);
                 UICommon::AlignTableCellText(rowH);
-                ImGui::Text("%s", st.details.loaded ? st.details.name.c_str() : "Loading...");
+                ImGui::Text("%s", st.details.loaded ? st.details.name.c_str() : (id == 1 ? Localization::GetText("coin") : "Loading..."));
 
                 // Right-click context menu for name
                 if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1))

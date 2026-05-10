@@ -38,7 +38,7 @@ extern "C" __declspec(dllexport) AddonDefinition_t* GetAddonDef()
     s_AddonDef.Version.Major    = 1;
     s_AddonDef.Version.Minor    = 0;
     s_AddonDef.Version.Build    = 1;
-    s_AddonDef.Version.Revision = 0;
+    s_AddonDef.Version.Revision = 1;
     s_AddonDef.Author           = "Livia.3928";
     s_AddonDef.Description      = "Tracks farmed items and currencies in real-time via DRF (drf.rs).";
     s_AddonDef.Load             = AddonLoad;
@@ -97,10 +97,10 @@ void AddonLoad(AddonAPI_t* aApi)
     SessionHistory::SetMaxSessions(g_Settings.maxSessionHistory);
     SessionHistory::SetSaveAllItems(true); // Always save timeline data
 
-    AutoReset::OnAddonLoad();
-
-    // Load persisted farming data
+    // Load persisted farming data FIRST before any reset logic
     ItemTracker::LoadData(addonDir);
+
+    AutoReset::OnAddonLoad();
 
     DrfClient::Init([](DrfStatus s) { /* Status change callback - unused */ });
 
