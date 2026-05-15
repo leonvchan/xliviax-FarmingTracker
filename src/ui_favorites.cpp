@@ -49,8 +49,25 @@ void RenderFavoritesTab()
         ImGui::Spacing();
         if (ImGui::Button(Localization::GetText("clear_all_favorite_items")))
         {
-            for (auto& [id, st] : favoriteItems)
-                ItemTracker::SetFavorite(id, false);
+            ImGui::OpenPopup("ClearAllFavoriteItemsConfirm");
+        }
+
+        if (ImGui::BeginPopupModal("ClearAllFavoriteItemsConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("%s", Localization::GetText("clear_all_favorite_items_confirm"));
+            ImGui::Spacing();
+            if (ImGui::Button(Localization::GetText("yes")))
+            {
+                for (auto& [id, st] : favoriteItems)
+                    ItemTracker::SetFavorite(id, false);
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(Localization::GetText("no")))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
         }
 
         ImGui::Spacing();
@@ -234,8 +251,25 @@ void RenderFavoritesTab()
         ImGui::Spacing();
         if (ImGui::Button(Localization::GetText("clear_all_favorite_currencies")))
         {
-            for (auto& [id, st] : favoriteCurrencies)
-                ItemTracker::SetFavorite(id, false);
+            ImGui::OpenPopup("ClearAllFavoriteCurrenciesConfirm");
+        }
+
+        if (ImGui::BeginPopupModal("ClearAllFavoriteCurrenciesConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("%s", Localization::GetText("clear_all_favorite_currencies_confirm"));
+            ImGui::Spacing();
+            if (ImGui::Button(Localization::GetText("yes")))
+            {
+                for (auto& [id, st] : favoriteCurrencies)
+                    ItemTracker::SetFavorite(id, false);
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(Localization::GetText("no")))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
         }
 
         ImGui::Spacing();

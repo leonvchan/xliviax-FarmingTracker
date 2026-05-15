@@ -271,6 +271,8 @@ void AutoReset::Tick()
 
 void AutoReset::OnManualReset()
 {
+    // Update last reset time to prevent automatic reset on next load
+    s_LastResetTime = UtcNow();
     UpdateNextResetDateTime();
     SettingsManager::Save();
 }

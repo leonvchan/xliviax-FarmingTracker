@@ -20,8 +20,26 @@ void RenderCustomProfitTab()
     // Clear All Button
     if (ImGui::Button(Localization::GetText("clear_all_custom_profits")))
     {
-        CustomProfitManager::ClearAll();
+        ImGui::OpenPopup("ClearAllCustomProfitsConfirm");
     }
+
+    if (ImGui::BeginPopupModal("ClearAllCustomProfitsConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("%s", Localization::GetText("clear_all_custom_profits_confirm"));
+        ImGui::Spacing();
+        if (ImGui::Button(Localization::GetText("yes")))
+        {
+            CustomProfitManager::ClearAll();
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(Localization::GetText("no")))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
     if (ImGui::IsItemHovered())
         ImGui::SetTooltip("%s", Localization::GetText("clear_all_custom_profits_tooltip"));
 

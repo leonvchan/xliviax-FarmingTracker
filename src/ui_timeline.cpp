@@ -173,7 +173,10 @@ namespace UITimeline
                             {
                                 currencyNames[d.itemId] = d.itemName;
                                 auto st = ItemTracker::GetCurrencyStat(d.itemId);
-                                currencyIcons[d.itemId] = st.details.iconUrl;
+                                std::string iconUrl = st.details.iconUrl;
+                                if (d.itemId == 1 && iconUrl.empty())
+                                    iconUrl = "https://wiki.guildwars2.com/images/e/eb/Copper_coin.png";
+                                currencyIcons[d.itemId] = iconUrl;
                                 currencyRarities[d.itemId] = st.details.rarity;
                             }
                         }
