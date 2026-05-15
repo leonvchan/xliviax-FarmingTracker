@@ -26,14 +26,15 @@ void RenderCustomProfitTab()
     if (ImGui::BeginPopupModal("ClearAllCustomProfitsConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("%s", Localization::GetText("clear_all_custom_profits_confirm"));
+        ImGui::Text("%s", Localization::GetText("clear_history_warning"));
         ImGui::Spacing();
-        if (ImGui::Button(Localization::GetText("yes")))
+        if (ImGui::Button(Localization::GetText("yes_clear")))
         {
             CustomProfitManager::ClearAll();
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        if (ImGui::Button(Localization::GetText("no")))
+        if (ImGui::Button(Localization::GetText("cancel")))
         {
             ImGui::CloseCurrentPopup();
         }

@@ -37,7 +37,7 @@ extern "C" __declspec(dllexport) AddonDefinition_t* GetAddonDef()
     s_AddonDef.Name             = "Farming Tracker";
     s_AddonDef.Version.Major    = 1;
     s_AddonDef.Version.Minor    = 0;
-    s_AddonDef.Version.Build    = 1;
+    s_AddonDef.Version.Build    = 2;
     s_AddonDef.Version.Revision = 1;
     s_AddonDef.Author           = "Livia.3928";
     s_AddonDef.Description      = "Tracks farmed items and currencies in real-time via DRF (drf.rs).";

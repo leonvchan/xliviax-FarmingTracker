@@ -32,15 +32,16 @@ void RenderIgnoredTab()
         if (ImGui::BeginPopupModal("ClearAllIgnoredItemsConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("%s", Localization::GetText("clear_all_ignored_items_confirm"));
+            ImGui::Text("%s", Localization::GetText("clear_history_warning"));
             ImGui::Spacing();
-            if (ImGui::Button(Localization::GetText("yes")))
+            if (ImGui::Button(Localization::GetText("yes_clear")))
             {
                 for (auto& id : ignoredItems)
                     IgnoredItemsManager::UnignoreItem(id);
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
-            if (ImGui::Button(Localization::GetText("no")))
+            if (ImGui::Button(Localization::GetText("cancel")))
             {
                 ImGui::CloseCurrentPopup();
             }
@@ -127,15 +128,16 @@ void RenderIgnoredTab()
         if (ImGui::BeginPopupModal("ClearAllIgnoredCurrenciesConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("%s", Localization::GetText("clear_all_ignored_currencies_confirm"));
+            ImGui::Text("%s", Localization::GetText("clear_history_warning"));
             ImGui::Spacing();
-            if (ImGui::Button(Localization::GetText("yes")))
+            if (ImGui::Button(Localization::GetText("yes_clear")))
             {
                 for (auto& id : ignoredCurrencies)
                     IgnoredItemsManager::UnignoreCurrency(id);
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
-            if (ImGui::Button(Localization::GetText("no")))
+            if (ImGui::Button(Localization::GetText("cancel")))
             {
                 ImGui::CloseCurrentPopup();
             }

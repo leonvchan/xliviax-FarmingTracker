@@ -55,15 +55,16 @@ void RenderFavoritesTab()
         if (ImGui::BeginPopupModal("ClearAllFavoriteItemsConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("%s", Localization::GetText("clear_all_favorite_items_confirm"));
+            ImGui::Text("%s", Localization::GetText("clear_history_warning"));
             ImGui::Spacing();
-            if (ImGui::Button(Localization::GetText("yes")))
+            if (ImGui::Button(Localization::GetText("yes_clear")))
             {
                 for (auto& [id, st] : favoriteItems)
                     ItemTracker::SetFavorite(id, false);
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
-            if (ImGui::Button(Localization::GetText("no")))
+            if (ImGui::Button(Localization::GetText("cancel")))
             {
                 ImGui::CloseCurrentPopup();
             }
@@ -257,15 +258,16 @@ void RenderFavoritesTab()
         if (ImGui::BeginPopupModal("ClearAllFavoriteCurrenciesConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("%s", Localization::GetText("clear_all_favorite_currencies_confirm"));
+            ImGui::Text("%s", Localization::GetText("clear_history_warning"));
             ImGui::Spacing();
-            if (ImGui::Button(Localization::GetText("yes")))
+            if (ImGui::Button(Localization::GetText("yes_clear")))
             {
                 for (auto& [id, st] : favoriteCurrencies)
                     ItemTracker::SetFavorite(id, false);
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
-            if (ImGui::Button(Localization::GetText("no")))
+            if (ImGui::Button(Localization::GetText("cancel")))
             {
                 ImGui::CloseCurrentPopup();
             }
