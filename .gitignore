@@ -361,9 +361,3 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-
-# Local dev helpers (machine-specific paths)
-build.bat
-
-# Cursor IDE (local rules and agent config)
-.cursor/
