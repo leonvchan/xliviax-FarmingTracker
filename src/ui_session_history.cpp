@@ -176,16 +176,16 @@ void RenderSessionHistoryTab()
     std::reverse(sessions.begin(), sessions.end());
 
     // Session History Table
-    if (ImGui::BeginTable("SessionHistoryTable_v2", 7, ImGuiTableFlags_Resizable | ImGuiTableFlags_Sortable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoSavedSettings))
+    if (ImGui::BeginTable("SessionHistoryTable_v2", 7, UICommon::DataTableFlags() | ImGuiTableFlags_Sortable | ImGuiTableFlags_ScrollY))
     {
         ImGui::TableSetupScrollFreeze(0, 1);
-        ImGui::TableSetupColumn(Localization::GetText("date"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 200.0f); // Default was auto, now 200px
-        ImGui::TableSetupColumn(Localization::GetText("duration"), ImGuiTableColumnFlags_WidthFixed, 100.0f);
-        ImGui::TableSetupColumn(Localization::GetText("profit"), ImGuiTableColumnFlags_WidthFixed, 120.0f);
-        ImGui::TableSetupColumn(Localization::GetText("profit_per_hour"), ImGuiTableColumnFlags_WidthFixed, 120.0f);
-        ImGui::TableSetupColumn(Localization::GetText("drops"), ImGuiTableColumnFlags_WidthFixed, 80.0f);
-        ImGui::TableSetupColumn(Localization::GetText("best_drop"), ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn(Localization::GetText("actions"), ImGuiTableColumnFlags_WidthFixed, 80.0f);
+        UICommon::TableColumnFixedAuto(Localization::GetText("date"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("duration"));
+        UICommon::TableColumnFixedAuto(Localization::GetText("profit"));
+        UICommon::TableColumnFixedAuto(Localization::GetText("profit_per_hour"));
+        UICommon::TableColumnFixedAuto(Localization::GetText("drops"));
+        UICommon::TableColumnStretchAuto(Localization::GetText("best_drop"));
+        UICommon::TableColumnFixedAuto(Localization::GetText("actions"));
         ImGui::TableHeadersRow();
 
         for (const auto& session : sessions)
@@ -307,14 +307,14 @@ void RenderSessionHistoryTab()
                 ImGui::Spacing();
 
                 // Drops table
-                if (ImGui::BeginTable("SessionDropsTable", 5, ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Sortable, ImVec2(0, 300)))
+                if (ImGui::BeginTable("SessionDropsTable", 5, UICommon::DataTableFlags() | ImGuiTableFlags_Sortable | ImGuiTableFlags_ScrollY, ImVec2(0, 300)))
                 {
                     ImGui::TableSetupScrollFreeze(0, 1);
-                    ImGui::TableSetupColumn(Localization::GetText("time"));
-                    ImGui::TableSetupColumn(Localization::GetText("item"));
-                    ImGui::TableSetupColumn(Localization::GetText("quantity"));
-                    ImGui::TableSetupColumn(Localization::GetText("value"));
-                    ImGui::TableSetupColumn(Localization::GetText("magic_find"));
+                    UICommon::TableColumnFixedAuto(Localization::GetText("time"));
+                    UICommon::TableColumnFixedAuto(Localization::GetText("item"));
+                    UICommon::TableColumnFixedAuto(Localization::GetText("quantity"));
+                    UICommon::TableColumnFixedAuto(Localization::GetText("value"));
+                    UICommon::TableColumnFixedAuto(Localization::GetText("magic_find"));
                     ImGui::TableHeadersRow();
 
                     for (const auto& drop : dropsToShow)

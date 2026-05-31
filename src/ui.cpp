@@ -18,6 +18,7 @@
 #include "ui_timeline.h"
 #include "ui_mini_window.h"
 #include "ui_notifications.h"
+#include "ui_layout.h"
 #include "shared.h"
 #include "settings.h"
 #include "item_tracker.h"
@@ -213,6 +214,8 @@ static void SafeReset()
 
 static void RenderMainWindow()
 {
+    UILayout::Tick();
+
     if (!g_Settings.showMainWindow) return;
 
     AutoReset::Tick();
@@ -447,6 +450,8 @@ void UI::Init()
 void UI::Shutdown()
 {
     if (!APIDefs) return;
+
+    UILayout::Save();
 
     APIDefs->GUI_Deregister(RenderMainWindow);
     APIDefs->GUI_Deregister(UIMiniWindow::RenderMiniWindow);

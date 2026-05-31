@@ -580,4 +580,20 @@ namespace UICommon
     {
         AlignTableCell(rowHeight, iconSize);
     }
+
+    ImGuiTableFlags DataTableFlags()
+    {
+        return ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable
+            | ImGuiTableFlags_SizingFixedFit;
+    }
+
+    void TableColumnFixedAuto(const char* label, ImGuiTableColumnFlags extraFlags)
+    {
+        ImGui::TableSetupColumn(label, ImGuiTableColumnFlags_WidthFixed | extraFlags, 0.0f);
+    }
+
+    void TableColumnStretchAuto(const char* label, ImGuiTableColumnFlags extraFlags)
+    {
+        ImGui::TableSetupColumn(label, ImGuiTableColumnFlags_WidthStretch | extraFlags, 0.0f);
+    }
 }

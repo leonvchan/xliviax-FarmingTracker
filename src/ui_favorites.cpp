@@ -142,14 +142,13 @@ void RenderFavoritesTab()
         else
         {
             // Table View for favorite items
-            if (ImGui::BeginTable("##FavoriteItemsTable_v3", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+            if (ImGui::BeginTable("##FavoriteItemsTable_v3", 5, UICommon::DataTableFlags()))
             {
-                float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-                ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                ImGui::TableSetupColumn(Localization::GetText("column_profit"), ImGuiTableColumnFlags_WidthStretch);
-                ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_count"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnStretchAuto(Localization::GetText("column_profit"));
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_NoHide);
                 ImGui::TableHeadersRow();
 
                 for (auto& [id, st] : sortedFavoriteItems)
@@ -353,13 +352,12 @@ void RenderFavoritesTab()
         else
         {
             // Table View for favorite currencies
-            if (ImGui::BeginTable("##FavoriteCurrenciesTable_v3", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+            if (ImGui::BeginTable("##FavoriteCurrenciesTable_v3", 4, UICommon::DataTableFlags()))
             {
-                float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-                ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthStretch);
-                ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnStretchAuto(Localization::GetText("column_count"));
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_NoHide);
                 ImGui::TableHeadersRow();
 
                 for (auto& [id, st] : sortedFavoriteCurrencies)

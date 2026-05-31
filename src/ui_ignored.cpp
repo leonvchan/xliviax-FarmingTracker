@@ -52,12 +52,11 @@ void RenderIgnoredTab()
         ImGui::Separator();
 
         // Display ignored items in a table
-        if (ImGui::BeginTable("##IgnoredItemsTable_v3", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+        if (ImGui::BeginTable("##IgnoredItemsTable_v3", 3, UICommon::DataTableFlags()))
         {
-            float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-            ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-            ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthStretch);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnStretchAuto(Localization::GetText("column_ignore"));
             ImGui::TableHeadersRow();
 
             for (auto& id : ignoredItems)
@@ -148,13 +147,12 @@ void RenderIgnoredTab()
         ImGui::Separator();
 
         // Display ignored currencies in a table
-        if (ImGui::BeginTable("##IgnoredCurrenciesTable_v3", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+        if (ImGui::BeginTable("##IgnoredCurrenciesTable_v3", 4, UICommon::DataTableFlags()))
         {
-            float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-            ImGui::TableSetupColumn(Localization::GetText("column_currency"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-            ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-            ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthStretch);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_currency"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_count"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnStretchAuto(Localization::GetText("column_ignore"));
             ImGui::TableHeadersRow();
 
             for (auto& id : ignoredCurrencies)

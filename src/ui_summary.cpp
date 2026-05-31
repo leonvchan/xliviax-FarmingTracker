@@ -135,11 +135,10 @@ void RenderSummaryTab()
 
     char overviewTableId[64];
     snprintf(overviewTableId, sizeof(overviewTableId), "OverviewStatsTable_v4");
-    if (ImGui::BeginTable(overviewTableId, 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoSavedSettings))
+    if (ImGui::BeginTable(overviewTableId, 2, UICommon::DataTableFlags()))
     {
-        // Approximately 50+ characters width (400px)
-        ImGui::TableSetupColumn(Localization::GetText("column_label"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 400.0f);
-        ImGui::TableSetupColumn(Localization::GetText("column_value"), ImGuiTableColumnFlags_WidthStretch);
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_label"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnStretchAuto(Localization::GetText("column_value"));
         ImGui::TableHeadersRow();
         float overviewRowH = UICommon::CalcTableRowHeight(0.0f);
 
@@ -307,13 +306,12 @@ void RenderSummaryTab()
 
         char topItemsProfitId[64];
         snprintf(topItemsProfitId, sizeof(topItemsProfitId), "TopItemsProfitTable_v5");
-        if (ImGui::BeginTable(topItemsProfitId, 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoSavedSettings))
+        if (ImGui::BeginTable(topItemsProfitId, 4, UICommon::DataTableFlags()))
         {
-            float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-            ImGui::TableSetupColumn(Localization::GetText("column_item"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 400.0f);
-            ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 100.0f);
-            ImGui::TableSetupColumn(Localization::GetText("column_profit"), ImGuiTableColumnFlags_WidthStretch);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_item"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_count"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnStretchAuto(Localization::GetText("column_profit"));
             ImGui::TableHeadersRow();
 
             auto sortedByProfit = ItemTracker::GetSortedItems(ItemTracker::SortMode::ProfitDesc);
@@ -373,12 +371,11 @@ void RenderSummaryTab()
 
         char topItemsCountId[64];
         snprintf(topItemsCountId, sizeof(topItemsCountId), "TopItemsCountTable_v5");
-        if (ImGui::BeginTable(topItemsCountId, 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoSavedSettings))
+        if (ImGui::BeginTable(topItemsCountId, 3, UICommon::DataTableFlags()))
         {
-            float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-            ImGui::TableSetupColumn(Localization::GetText("column_item"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 400.0f);
-            ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthStretch);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_item"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnStretchAuto(Localization::GetText("column_count"));
             ImGui::TableHeadersRow();
 
             auto sortedByCount = ItemTracker::GetSortedItems(ItemTracker::SortMode::CountDesc);
@@ -424,12 +421,11 @@ void RenderSummaryTab()
 
         char topCurrenciesCountId[64];
         snprintf(topCurrenciesCountId, sizeof(topCurrenciesCountId), "TopCurrenciesCountTable_v5");
-        if (ImGui::BeginTable(topCurrenciesCountId, 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoSavedSettings))
+        if (ImGui::BeginTable(topCurrenciesCountId, 3, UICommon::DataTableFlags()))
         {
-            float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-            ImGui::TableSetupColumn(Localization::GetText("column_currency"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 400.0f);
-            ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthStretch);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_currency"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnStretchAuto(Localization::GetText("column_count"));
             ImGui::TableHeadersRow();
 
             auto sortedCurrencies = ItemTracker::GetSortedCurrencies(ItemTracker::SortMode::CountDesc);

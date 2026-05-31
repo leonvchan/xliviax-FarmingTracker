@@ -22,6 +22,7 @@
 #include "item_tracker.h"
 #include "session_history.h"
 #include "ui_notifications.h"
+#include "ui_layout.h"
 #include "gw2_api.h"
 
 void AddonLoad(AddonAPI_t* aApi);
@@ -84,6 +85,8 @@ void AddonLoad(AddonAPI_t* aApi)
     const char* addonDir = APIDefs->Paths_GetAddonDirectory("FarmingTracker");
     APIDefs->Log(LOGL_INFO, "FarmingTracker", addonDir ? addonDir : "NULL");
     SettingsManager::Init(addonDir);
+
+    UILayout::Init(addonDir);
 
     // Initialize localization with saved language
     Localization::SetLanguage(Localization::StringToLanguage(g_Settings.language));

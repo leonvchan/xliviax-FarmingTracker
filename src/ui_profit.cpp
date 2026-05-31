@@ -238,13 +238,12 @@ void RenderProfitTab()
             ImGui::Spacing();
             ImGui::Separator();
             ImGui::Text("%s", Localization::GetText("top_drops"));
-            if (ImGui::BeginTable("ProfitTopDrops_v2", 4, ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoSavedSettings))
+            if (ImGui::BeginTable("ProfitTopDrops_v2", 4, UICommon::DataTableFlags()))
             {
-                float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                ImGui::TableSetupColumn(Localization::GetText("item"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 350.0f);
-                ImGui::TableSetupColumn(Localization::GetText("count"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 100.0f);
-                ImGui::TableSetupColumn(Localization::GetText("value"), ImGuiTableColumnFlags_WidthStretch);
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnFixedAuto(Localization::GetText("item"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnFixedAuto(Localization::GetText("count"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnStretchAuto(Localization::GetText("value"));
                 ImGui::TableHeadersRow();
 
                 for (const auto& drop : summary.topDrops)

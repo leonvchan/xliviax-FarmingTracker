@@ -38,4 +38,9 @@ namespace UICommon
     void AlignTableCellText(float rowHeight);
     void AlignTableCellFrame(float rowHeight);
     void AlignTableCellIcon(float rowHeight, float iconSize);
+
+    // Data tables: first load auto-fits fixed columns to content; saved widths come from imgui_layout.ini.
+    ImGuiTableFlags DataTableFlags();
+    void TableColumnFixedAuto(const char* label, ImGuiTableColumnFlags extraFlags = ImGuiTableColumnFlags_None);
+    void TableColumnStretchAuto(const char* label, ImGuiTableColumnFlags extraFlags = ImGuiTableColumnFlags_None);
 }

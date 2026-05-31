@@ -138,12 +138,12 @@ void RenderCustomProfitTab()
     }
     else
     {
-        if (ImGui::BeginTable("CustomProfitItemsTable", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
+        if (ImGui::BeginTable("CustomProfitItemsTable", 4, UICommon::DataTableFlags()))
         {
-            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 40.0f);
-            ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 150.0f);
-            ImGui::TableSetupColumn(Localization::GetText("custom_profit_value"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-            ImGui::TableSetupColumn(Localization::GetText("custom_profit_remove"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 100.0f);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnStretchAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("custom_profit_value"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("custom_profit_remove"), ImGuiTableColumnFlags_NoHide);
             ImGui::TableHeadersRow();
 
             for (auto& [id, profit] : customProfitItems)
@@ -218,12 +218,12 @@ void RenderCustomProfitTab()
     }
     else
     {
-        if (ImGui::BeginTable("CustomProfitCurrenciesTable", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
+        if (ImGui::BeginTable("CustomProfitCurrenciesTable", 4, UICommon::DataTableFlags()))
         {
-            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 40.0f);
-            ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 150.0f);
-            ImGui::TableSetupColumn(Localization::GetText("custom_profit_value"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-            ImGui::TableSetupColumn(Localization::GetText("custom_profit_remove"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 100.0f);
+            UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnStretchAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("custom_profit_value"), ImGuiTableColumnFlags_NoHide);
+            UICommon::TableColumnFixedAuto(Localization::GetText("custom_profit_remove"), ImGuiTableColumnFlags_NoHide);
             ImGui::TableHeadersRow();
 
             for (auto& [id, profit] : customProfitCurrencies)

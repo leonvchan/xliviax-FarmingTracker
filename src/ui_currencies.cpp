@@ -429,14 +429,13 @@ void RenderCurrenciesTab()
                     {
                         if (ImGui::BeginTabItem(cat.c_str()))
                         {
-                            if (ImGui::BeginTable("##CurrenciesTable_v3_Tabs", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+                            if (ImGui::BeginTable("##CurrenciesTable_v3_Tabs", 5, UICommon::DataTableFlags()))
                             {
-                                float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                                ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                                ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthStretch);
-                                ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 180.0f);
+                                UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+                                UICommon::TableColumnFixedAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+                                UICommon::TableColumnStretchAuto(Localization::GetText("column_count"));
+                                UICommon::TableColumnFixedAuto(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_NoHide);
+                                UICommon::TableColumnFixedAuto(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_NoHide);
                                 ImGui::TableHeadersRow();
 
                                 for (auto& [id, st] : sortedCurrencies)
@@ -462,14 +461,13 @@ void RenderCurrenciesTab()
 
                     if (ImGui::CollapsingHeader(cat.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                     {
-                        if (ImGui::BeginTable(("##CurrenciesTable_v3_" + cat).c_str(), 5, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+                        if (ImGui::BeginTable(("##CurrenciesTable_v3_" + cat).c_str(), 5, UICommon::DataTableFlags()))
                         {
-                            float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                            ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthStretch);
-                            ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 180.0f);
+                            UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+                            UICommon::TableColumnFixedAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+                            UICommon::TableColumnStretchAuto(Localization::GetText("column_count"));
+                            UICommon::TableColumnFixedAuto(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_NoHide);
+                            UICommon::TableColumnFixedAuto(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_NoHide);
                             ImGui::TableHeadersRow();
 
                             for (auto& [id, st] : sortedCurrencies)
@@ -487,14 +485,13 @@ void RenderCurrenciesTab()
         {
             // Table View for Currencies
             int currencyTableColumnCount = 5;
-            if (ImGui::BeginTable("##CurrenciesTable_v3", currencyTableColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+            if (ImGui::BeginTable("##CurrenciesTable_v3", currencyTableColumnCount, UICommon::DataTableFlags()))
             {
-                float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-                ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthStretch);
-                ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 180.0f);
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnStretchAuto(Localization::GetText("column_count"));
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_NoHide);
+                UICommon::TableColumnFixedAuto(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_NoHide);
                 ImGui::TableHeadersRow();
 
                 for (auto& [id, st] : sortedCurrencies)

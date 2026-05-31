@@ -102,6 +102,7 @@
     <ClCompile Include="src\item_tracker.cpp" />
     <ClCompile Include="src\drf_client.cpp" />
     <ClCompile Include="src\ui.cpp" />
+    <ClCompile Include="src\ui_layout.cpp" />
     <ClCompile Include="src\ui_common.cpp" />
     <ClCompile Include="src\ui_summary.cpp" />
     <ClCompile Include="src\ui_items.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="src\item_tracker.h" />
     <ClInclude Include="src\drf_client.h" />
     <ClInclude Include="src\ui.h" />
+    <ClInclude Include="src\ui_layout.h" />
     <ClInclude Include="src\ui_common.h" />
     <ClInclude Include="src\ui_summary.h" />
     <ClInclude Include="src\ui_items.h" />

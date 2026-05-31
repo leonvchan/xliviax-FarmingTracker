@@ -7,6 +7,31 @@
 #include <algorithm>
 #include <cstring>
 
+namespace
+{
+    void SetupStandardItemTableColumns()
+    {
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_count"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_profit"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnStretchAuto(Localization::GetText("magic_find"));
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_NoHide);
+    }
+
+    void SetupCompactItemTableColumns()
+    {
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_icon"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnStretchAuto(Localization::GetText("column_name"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_count"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_profit"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("magic_find"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_NoHide);
+        UICommon::TableColumnFixedAuto(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_NoHide);
+    }
+}
+
 namespace UIItems
 {
 void RenderItemsTab()
@@ -748,16 +773,9 @@ void RenderItemsTab()
             int bestDropId = bestDrop.first;
 
             // Normal view without grouping
-            if (ImGui::BeginTable("##ItemsTable_v3", itemTableColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+            if (ImGui::BeginTable("##ItemsTable_v3", itemTableColumnCount, UICommon::DataTableFlags()))
             {
-                float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-                ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                ImGui::TableSetupColumn(Localization::GetText("column_profit"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                ImGui::TableSetupColumn(Localization::GetText("magic_find"), ImGuiTableColumnFlags_WidthStretch);
-                ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
-                ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
+                SetupStandardItemTableColumns();
                 ImGui::TableHeadersRow();
 
                 for (auto& [id, st] : sortedItems)
@@ -1004,16 +1022,9 @@ void RenderItemsTab()
                     {
                         ImGui::PopStyleColor(4);
 
-                        if (ImGui::BeginTable(("##RarityTable_v3_" + rarity).c_str(), itemTableColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+                        if (ImGui::BeginTable(("##RarityTable_v3_" + rarity).c_str(), itemTableColumnCount, UICommon::DataTableFlags()))
                         {
-                            float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                            ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("column_profit"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("magic_find"), ImGuiTableColumnFlags_WidthStretch);
-                            ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
+                            SetupStandardItemTableColumns();
                             ImGui::TableHeadersRow();
 
                             for (auto& [id, st] : rarityGroups[rarity])
@@ -1158,16 +1169,9 @@ void RenderItemsTab()
                         {
                             ImGui::PopStyleColor();
 
-                            if (ImGui::BeginTable(("##RarityTable_" + rarity).c_str(), itemTableColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
+                            if (ImGui::BeginTable(("##RarityTable_" + rarity).c_str(), itemTableColumnCount, UICommon::DataTableFlags()))
                             {
-                                float iconColumnWidth = static_cast<float>(g_Settings.iconSize) + 10.0f;
-                                ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                                ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 110.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("column_profit"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 120.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("magic_find"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
+                                SetupCompactItemTableColumns();
                                 ImGui::TableHeadersRow();
 
                                 for (auto& [id, st] : rarityGroups[rarity])
@@ -1358,16 +1362,9 @@ void RenderItemsTab()
                     if (ImGui::CollapsingHeader(headerLabel, ImGuiTreeNodeFlags_DefaultOpen))
                     {
                         ImGui::PopStyleColor(3);
-                        if (ImGui::BeginTable(("##TypeTable_" + std::to_string(static_cast<int>(type))).c_str(), itemTableColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+                        if (ImGui::BeginTable(("##TypeTable_" + std::to_string(static_cast<int>(type))).c_str(), itemTableColumnCount, UICommon::DataTableFlags()))
                         {
-                            float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                            ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                            ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("column_profit"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("magic_find"), ImGuiTableColumnFlags_WidthStretch);
-                            ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
-                            ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
+                            SetupStandardItemTableColumns();
                             ImGui::TableHeadersRow();
 
                             for (auto& [id, st] : it->second)
@@ -1503,16 +1500,9 @@ void RenderItemsTab()
 
                         if (ImGui::BeginTabItem(tabLabel))
                         {
-                            if (ImGui::BeginTable(("##TypeTable_" + std::to_string(static_cast<int>(type))).c_str(), itemTableColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+                            if (ImGui::BeginTable(("##TypeTable_" + std::to_string(static_cast<int>(type))).c_str(), itemTableColumnCount, UICommon::DataTableFlags()))
                             {
-                                float iconColumnWidth = (static_cast<float>(g_Settings.iconSize) + 10.0f > 70.0f) ? (static_cast<float>(g_Settings.iconSize) + 10.0f) : 70.0f;
-                                ImGui::TableSetupColumn(Localization::GetText("column_icon"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, iconColumnWidth);
-                                ImGui::TableSetupColumn(Localization::GetText("column_name"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 430.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("column_count"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("column_profit"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 150.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("magic_find"), ImGuiTableColumnFlags_WidthStretch);
-                                ImGui::TableSetupColumn(Localization::GetText("column_favorite"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
-                                ImGui::TableSetupColumn(Localization::GetText("column_ignore"), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f);
+                                SetupStandardItemTableColumns();
                                 ImGui::TableHeadersRow();
 
                                 for (auto& [id, st] : it->second)
