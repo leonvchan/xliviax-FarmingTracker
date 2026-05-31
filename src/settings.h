@@ -82,7 +82,7 @@ struct Settings
     float miniWindowHeight = 200.0f;
 
     // Main Window Settings
-    bool showMainWindow = true;
+    bool showMainWindow = false;
     bool mainWindowClickThrough = false;
     float mainWindowPosX = 100.0f;
     float mainWindowPosY = 100.0f;

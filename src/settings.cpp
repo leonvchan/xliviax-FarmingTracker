@@ -224,6 +224,7 @@ void SettingsManager::Load()
         if (j.contains("miniWindowToggleHotkey")) g_Settings.miniWindowToggleHotkey = j["miniWindowToggleHotkey"].get<std::string>();
         if (j.contains("mainTabOrder")) g_Settings.mainTabOrder = j["mainTabOrder"].get<std::vector<std::string>>();
         if (j.contains("nextResetDateTimeUtc")) g_Settings.nextResetDateTimeUtc = j["nextResetDateTimeUtc"].get<std::string>();
+        if (j.contains("showMainWindow")) g_Settings.showMainWindow = j["showMainWindow"].get<bool>();
         if (j.contains("showMiniWindow")) g_Settings.showMiniWindow = j["showMiniWindow"].get<bool>();
         if (j.contains("miniWindowShowProfit")) g_Settings.miniWindowShowProfit = j["miniWindowShowProfit"].get<bool>();
         if (j.contains("miniWindowShowProfitPerHour")) g_Settings.miniWindowShowProfitPerHour = j["miniWindowShowProfitPerHour"].get<bool>();
@@ -602,6 +603,7 @@ void SettingsManager::Save()
     j["miniWindowToggleHotkey"] = g_Settings.miniWindowToggleHotkey;
     j["mainTabOrder"]           = g_Settings.mainTabOrder;
     j["nextResetDateTimeUtc"]  = g_Settings.nextResetDateTimeUtc;
+    j["showMainWindow"]        = g_Settings.showMainWindow;
     j["showMiniWindow"]        = g_Settings.showMiniWindow;
     j["miniWindowShowProfit"]  = g_Settings.miniWindowShowProfit;
     j["miniWindowShowProfitPerHour"] = g_Settings.miniWindowShowProfitPerHour;
@@ -971,6 +973,7 @@ void SettingsManager::ExportToFile(const std::string& filePath)
     j["miniWindowToggleHotkey"] = g_Settings.miniWindowToggleHotkey;
     j["mainTabOrder"]           = g_Settings.mainTabOrder;
     j["nextResetDateTimeUtc"]  = g_Settings.nextResetDateTimeUtc;
+    j["showMainWindow"]        = g_Settings.showMainWindow;
     j["showMiniWindow"]        = g_Settings.showMiniWindow;
     j["miniWindowShowProfit"]  = g_Settings.miniWindowShowProfit;
     j["miniWindowShowProfitPerHour"] = g_Settings.miniWindowShowProfitPerHour;
@@ -1287,6 +1290,7 @@ void SettingsManager::ImportFromFile(const std::string& filePath)
         if (j.contains("miniWindowToggleHotkey")) g_Settings.miniWindowToggleHotkey = j["miniWindowToggleHotkey"].get<std::string>();
         if (j.contains("mainTabOrder")) g_Settings.mainTabOrder = j["mainTabOrder"].get<std::vector<std::string>>();
         if (j.contains("nextResetDateTimeUtc")) g_Settings.nextResetDateTimeUtc = j["nextResetDateTimeUtc"].get<std::string>();
+        if (j.contains("showMainWindow")) g_Settings.showMainWindow = j["showMainWindow"].get<bool>();
         if (j.contains("showMiniWindow")) g_Settings.showMiniWindow = j["showMiniWindow"].get<bool>();
         if (j.contains("miniWindowShowProfit")) g_Settings.miniWindowShowProfit = j["miniWindowShowProfit"].get<bool>();
         if (j.contains("miniWindowShowProfitPerHour")) g_Settings.miniWindowShowProfitPerHour = j["miniWindowShowProfitPerHour"].get<bool>();
@@ -1652,6 +1656,7 @@ void SettingsManager::ResetToDefaults()
     g_Settings.enableBestDropInMiniWindow = false;
     g_Settings.gradientTopColor[0] = 0.95f; g_Settings.gradientTopColor[1] = 0.95f; g_Settings.gradientTopColor[2] = 1.0f; g_Settings.gradientTopColor[3] = 1.0f;
     g_Settings.gradientBottomColor[0] = 0.85f; g_Settings.gradientBottomColor[1] = 0.85f; g_Settings.gradientBottomColor[2] = 0.95f; g_Settings.gradientBottomColor[3] = 1.0f;
+    g_Settings.showMainWindow = false;
     g_Settings.showMiniWindow = false;
     g_Settings.miniWindowShowProfit = true;
     g_Settings.miniWindowShowProfitPerHour = true;
@@ -1886,6 +1891,7 @@ void SettingsManager::CreateProfile(const std::string& name)
     j["gradientBottomColor"] = nlohmann::json::array();
     for (int i = 0; i < 4; i++)
         j["gradientBottomColor"].push_back(g_Settings.gradientBottomColor[i]);
+    j["showMainWindow"] = g_Settings.showMainWindow;
     j["showMiniWindow"] = g_Settings.showMiniWindow;
     j["miniWindowShowProfit"] = g_Settings.miniWindowShowProfit;
     j["miniWindowShowProfitPerHour"] = g_Settings.miniWindowShowProfitPerHour;
@@ -1969,6 +1975,7 @@ void SettingsManager::ApplyProfile(int index)
             for (int i = 0; i < 4; i++)
                 g_Settings.gradientBottomColor[i] = j["gradientBottomColor"][i].get<float>();
         }
+        if (j.contains("showMainWindow")) g_Settings.showMainWindow = j["showMainWindow"].get<bool>();
         if (j.contains("showMiniWindow")) g_Settings.showMiniWindow = j["showMiniWindow"].get<bool>();
         if (j.contains("miniWindowShowProfit")) g_Settings.miniWindowShowProfit = j["miniWindowShowProfit"].get<bool>();
         if (j.contains("miniWindowShowProfitPerHour")) g_Settings.miniWindowShowProfitPerHour = j["miniWindowShowProfitPerHour"].get<bool>();
@@ -2073,6 +2080,7 @@ void SettingsManager::UpdateProfile(int index)
     j["gradientBottomColor"] = nlohmann::json::array();
     for (int i = 0; i < 4; i++)
         j["gradientBottomColor"].push_back(g_Settings.gradientBottomColor[i]);
+    j["showMainWindow"] = g_Settings.showMainWindow;
     j["showMiniWindow"] = g_Settings.showMiniWindow;
     j["miniWindowShowProfit"] = g_Settings.miniWindowShowProfit;
     j["miniWindowShowProfitPerHour"] = g_Settings.miniWindowShowProfitPerHour;
